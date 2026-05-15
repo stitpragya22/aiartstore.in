@@ -39,3 +39,7 @@ writable/testing/*
 # Debug
 build/
 *.sql
+
+# Deployment
+/extract.php
+/aiartstore.zip
