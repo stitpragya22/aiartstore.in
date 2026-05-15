@@ -1,0 +1,41 @@
+# Environment
+.env
+
+# Dependencies
+vendor/
+
+# Uploaded files
+uploads/products/*
+!uploads/products/.gitkeep
+
+# OS
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+writable/logs/*
+!writable/logs/.gitkeep
+
+# Cache
+writable/cache/*
+!writable/cache/.gitkeep
+writable/session/*
+!writable/session/.gitkeep
+
+# Temp
+writable/temp/*
+!writable/temp/.gitkeep
+
+# Tests
+writable/testing/*
+!writable/testing/.gitkeep
+
+# Debug
+build/
+*.sql
