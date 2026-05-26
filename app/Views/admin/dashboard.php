@@ -45,6 +45,17 @@
             </div>
         </div>
     </div>
+    <div class="col-md-3">
+        <div class="stat-card-admin">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background: rgba(236,72,153,0.2); color: #ec4899;"><i class="bi bi-pencil-square"></i></div>
+                <div>
+                    <small class="text-muted">Blog Posts</small>
+                    <h3 class="mb-0 fw-bold"><?= $totalBlogPosts ?? 0 ?></h3>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="card-admin">
@@ -67,6 +78,32 @@
                     <td><span class="badge-status <?= $order['status'] ?>"><?= ucfirst($order['status']) ?></span></td>
                     <td class="text-muted"><?= date('d M Y', strtotime($order['created_at'])) ?></td>
                     <td><a href="<?= site_url('/admin/orders/' . $order['id']) ?>" class="btn btn-sm btn-primary-custom">View</a></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <?php endif; ?>
+</div>
+
+<div class="card-admin">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Recent Blog Posts</h5>
+        <a href="<?= site_url('/admin/blog/posts') ?>" class="btn btn-sm btn-outline-custom">View All</a>
+    </div>
+    <?php if (empty($recentBlogPosts)): ?>
+        <p class="text-muted mb-0">No blog posts yet</p>
+    <?php else: ?>
+    <div class="table-responsive">
+        <table class="table table-admin">
+            <thead><tr><th>Title</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+            <tbody>
+                <?php foreach ($recentBlogPosts as $bp): ?>
+                <tr>
+                    <td><strong><?= esc($bp['title']) ?></strong></td>
+                    <td><span class="badge-status <?= $bp['status'] ?>"><?= ucfirst($bp['status']) ?></span></td>
+                    <td class="text-muted"><?= $bp['published_at'] ? date('d M Y', strtotime($bp['published_at'])) : '-' ?></td>
+                    <td><a href="<?= site_url('/admin/blog/posts/edit/' . $bp['id']) ?>" class="btn btn-sm btn-primary-custom">Edit</a></td>
                 </tr>
                 <?php endforeach; ?>
             </tbody>

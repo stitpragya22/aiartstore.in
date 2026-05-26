@@ -3,7 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title ?? 'AI Art Store' ?> | AI Art Store</title>
+    <title><?= esc($title ?? 'AI Art Store') ?> | AI Art Store</title>
+    <meta name="description" content="<?= esc($meta_description ?? 'Discover premium AI-generated art. Browse our gallery of unique digital artworks available for instant download.') ?>">
+    <link rel="icon" type="image/png" href="<?= base_url('/favicon.png') ?>">
+    <link rel="canonical" href="<?= site_url(uri_string()) ?>">
+    <meta property="og:title" content="<?= esc($meta_title ?? $title ?? 'AI Art Store') ?>">
+    <meta property="og:description" content="<?= esc($meta_description ?? 'Discover premium AI-generated art. Browse our gallery of unique digital artworks available for instant download.') ?>">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= site_url(uri_string()) ?>">
+    <?php if (isset($meta_image) && $meta_image): ?>
+    <meta property="og:image" content="<?= base_url($meta_image) ?>">
+    <?php endif; ?>
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= esc($meta_title ?? $title ?? 'AI Art Store') ?>">
+    <meta name="twitter:description" content="<?= esc($meta_description ?? 'Discover premium AI-generated art.') ?>">
+    <?php if (isset($meta_image) && $meta_image): ?>
+    <meta name="twitter:image" content="<?= base_url($meta_image) ?>">
+    <?php endif; ?>
+    <meta name="csrf-token" content="<?= csrf_hash() ?>">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0a0f">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -165,26 +185,53 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px var(--accent-glow);
         }
 
-        .card-art .art-image {
+        .art-image-wrapper {
+            position: relative;
+            width: 100%;
             height: 280px;
-            object-fit: cover;
+            overflow: hidden;
+            background: var(--bg-card);
+        }
+
+        .art-image-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            filter: blur(24px) brightness(0.3);
+            transform: scale(1.1);
+        }
+
+        .card-art .art-image {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            z-index: 1;
             transition: transform 0.6s;
         }
 
-        .card-art:hover .art-image { transform: scale(1.05); }
+        .card-art:hover .art-image { transform: scale(1.03); }
+
+        .art-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: var(--text-muted);
+        }
 
         .card-art .art-overlay {
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%);
-            opacity: 0;
-            transition: opacity 0.4s;
+            left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 60%);
             display: flex;
             align-items: flex-end;
             padding: 1rem;
+            z-index: 2;
         }
-
-        .card-art:hover .art-overlay { opacity: 1; }
 
         .watermark-badge {
             position: absolute;
@@ -196,6 +243,7 @@
             padding: 4px 10px;
             border-radius: 20px;
             backdrop-filter: blur(4px);
+            z-index: 3;
             font-weight: 500;
         }
 
@@ -267,6 +315,9 @@
             padding: 3rem 0;
             margin-top: auto;
         }
+        .footer .text-muted { color: #9ca3af !important; }
+        .footer a.text-muted:hover { color: var(--accent-secondary) !important; }
+        .footer h5, .footer h6 { color: var(--text-primary); }
 
         .price-tag {
             font-family: 'Space Grotesk', sans-serif;
@@ -315,17 +366,6 @@
 
         .table-art > :not(caption) > * > * { background: transparent; color: var(--text-primary); }
 
-        .alert-custom {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            color: var(--text-primary);
-        }
-
-        .alert-custom.alert-success { border-left: 4px solid var(--success); }
-        .alert-custom.alert-danger { border-left: 4px solid var(--danger); }
-        .alert-custom.alert-info { border-left: 4px solid var(--accent-primary); }
-
         .page-link {
             background: var(--bg-card);
             border-color: var(--border-color);
@@ -343,8 +383,6 @@
             border-color: var(--accent-primary);
         }
 
-        .toast-container { z-index: 9999; }
-
         .badge-status {
             padding: 0.4rem 0.8rem;
             border-radius: 20px;
@@ -357,11 +395,37 @@
         .badge-status.processing { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
         .badge-status.cancelled { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
 
-        .product-detail-image {
+        .product-detail-wrapper {
+            position: relative;
             border-radius: 20px;
-            max-height: 500px;
+            overflow: hidden;
+            background: var(--bg-card);
+            max-height: 550px;
+        }
+        .product-detail-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            filter: blur(30px);
+            opacity: 0.5;
+        }
+        .product-detail-image {
+            position: relative;
+            border-radius: 20px;
             width: 100%;
-            object-fit: cover;
+            max-height: 550px;
+            object-fit: contain;
+            display: block;
+        }
+        .product-detail-placeholder {
+            aspect-ratio: 4/3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            color: var(--text-muted);
+            font-size: 3rem;
         }
 
         .empty-state {
@@ -375,12 +439,84 @@
             margin-bottom: 1rem;
         }
 
-        @media (max-width: 768px) {
-            .section-title { font-size: 1.8rem; }
-            .hero-section { padding: 3rem 0; }
-            .card-art .art-image { height: 200px; }
+        .app-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10,10,15,0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-color);
+            z-index: 9999;
+            padding: 6px 0;
+            padding-bottom: max(6px, env(safe-area-inset-bottom, 6px));
+            justify-content: space-around;
+            align-items: center;
         }
+        .app-bottom-nav a, .app-bottom-nav button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            font-weight: 500;
+            transition: color 0.2s;
+            border: none;
+            background: none;
+            cursor: pointer;
+            padding: 4px 12px;
+            min-width: 48px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .app-bottom-nav a.active, .app-bottom-nav a:active,
+        .app-bottom-nav button.active, .app-bottom-nav button:active {
+            color: var(--accent-primary);
+        }
+        .app-bottom-nav a i, .app-bottom-nav button i {
+            font-size: 1.35rem;
+            line-height: 1;
+        }
+        .app-bottom-nav .nav-badge {
+            position: absolute;
+            top: -2px;
+            right: -6px;
+            background: var(--gradient-1);
+            color: #fff;
+            font-size: 0.55rem;
+            width: 17px;
+            height: 17px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        .app-bottom-nav .nav-icon-wrap {
+            position: relative;
+            display: inline-flex;
+        }
+        @media (max-width: 767px) {
+            body { padding-bottom: 64px; padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+            .app-bottom-nav { display: flex; }
+            .navbar { padding: 0.6rem 0; }
+            .navbar .nav-link, .navbar .btn-outline-custom { font-size: 0.85rem; }
+            .section-title { font-size: 1.6rem; }
+            .hero-section { padding: 2rem 0; }
+            .card-art .art-image { height: 200px; }
+            .product-detail-wrapper { max-height: 300px; }
+            .art-image-wrapper { height: 180px; }
+        }
+        body { -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
+        * { -webkit-overflow-scrolling: touch; }
+        .touch-ripple:active { transform: scale(0.97); }
     </style>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg sticky-top">
@@ -394,7 +530,8 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item"><a class="nav-link <?= current_url() == site_url('/') ? 'active' : '' ?>" href="<?= site_url('/') ?>">Home</a></li>
-                    <li class="nav-item"><a class="nav-link <?= strpos(current_url(), '/shop') !== false ? 'active' : '' ?>" href="<?= site_url('/shop') ?>">Gallery</a></li>
+                    <li class="nav-item"><a class="nav-link <?= strpos(current_url(), '/shop') !== false ? 'active' : '' ?>" href="<?= site_url('/shop') ?>">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link <?= strpos(current_url(), '/blog') !== false ? 'active' : '' ?>" href="<?= site_url('/blog') ?>">Blog</a></li>
                     <li class="nav-item"><a class="nav-link <?= strpos(current_url(), '/orders') !== false ? 'active' : '' ?>" href="<?= site_url('/orders') ?>">Orders</a></li>
                     <li class="nav-item"><a class="nav-link <?= strpos(current_url(), '/downloads') !== false ? 'active' : '' ?>" href="<?= site_url('/downloads') ?>">Downloads</a></li>
                 </ul>
@@ -430,11 +567,11 @@
     </nav>
     <main>
         <?php if (session()->has('message')): ?>
-            <div class="container mt-3"><div class="alert alert-custom alert-success d-flex align-items-center"><i class="bi bi-check-circle-fill me-2"></i><?= session('message') ?></div></div>
+        <script>$(function(){showToast('<?= esc(session('message')) ?>','success');});</script>
         <?php endif; ?>
         <?php if (session()->has('error')): ?>
-            <div class="container mt-3"><div class="alert alert-custom alert-danger d-flex align-items-center"><i class="bi bi-exclamation-circle-fill me-2"></i><?= session('error') ?></div></div>
+        <script>$(function(){showToast('<?= esc(session('error')) ?>','error');});</script>
         <?php endif; ?>
         <?php if (session()->has('errors')): ?>
-            <div class="container mt-3"><div class="alert alert-custom alert-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i><?= implode('<br>', session('errors')) ?></div></div>
+        <script>$(function(){showToast('<?= esc(implode('\\n', session('errors'))) ?>','error');});</script>
         <?php endif; ?>

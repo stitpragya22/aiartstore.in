@@ -1,2 +1,9 @@
 User-agent: *
-Disallow: 
+Disallow: /admin/
+Disallow: /cart/
+Disallow: /checkout/
+Disallow: /orders/
+Disallow: /downloads/
+Disallow: /download/
+
+Sitemap: https://aiartstore.in/sitemap.xml

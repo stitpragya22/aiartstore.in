@@ -11,7 +11,7 @@
                 <?php foreach ($orders as $order): ?>
                 <tr>
                     <td><strong><?= esc($order['order_number']) ?></strong></td>
-                    <td><?= esc($order['username'] ?? $order['email'] ?? 'N/A') ?></td>
+                    <td><?= esc($order['username'] ?? $order['customer_email'] ?? $order['identity_email'] ?? 'N/A') ?></td>
                     <td class="price-tag"><?= formatPrice($order['total']) ?></td>
                     <td><span class="badge-status <?= $order['payment_status'] === 'completed' ? 'completed' : 'pending' ?>"><?= ucfirst($order['payment_status']) ?></span></td>
                     <td><span class="badge-status <?= $order['status'] ?>"><?= ucfirst($order['status']) ?></span></td>

@@ -9,7 +9,7 @@ class CategoryModel extends Model
     protected $table            = 'categories';
     protected $primaryKey       = 'id';
     protected $useSoftDeletes   = false;
-    protected $allowedFields    = ['name', 'slug', 'description', 'image', 'status'];
+    protected $allowedFields    = ['name', 'slug', 'description', 'image', 'status', 'meta_title', 'meta_description'];
     protected $useTimestamps    = true;
     protected $validationRules  = [
         'name' => 'required|min_length[2]|max_length[100]',

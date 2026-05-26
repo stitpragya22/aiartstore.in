@@ -10,10 +10,16 @@ class OrderModel extends Model
     protected $primaryKey       = 'id';
     protected $useSoftDeletes   = false;
     protected $allowedFields    = [
-        'user_id', 'order_number', 'subtotal', 'tax', 'discount', 'total',
-        'payment_method', 'payment_id', 'payment_status', 'status', 'invoice_no', 'notes'
+        'user_id', 'customer_email', 'coupon_code', 'order_number', 'subtotal', 'tax', 'discount', 'total',
+        'payment_method', 'gateway_order_id', 'payment_id', 'payment_status', 'payment_verified_at',
+        'fulfillment_sent_at', 'status', 'invoice_no', 'notes'
     ];
     protected $useTimestamps    = true;
+    protected $validationRules  = [
+        'order_number' => 'required|max_length[50]',
+        'total'        => 'required|numeric|greater_than_equal_to[0]',
+        'user_id'      => 'required|is_natural_no_zero',
+    ];
 
     public function getUserOrders($userId)
     {

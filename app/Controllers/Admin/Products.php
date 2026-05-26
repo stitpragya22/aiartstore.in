@@ -44,11 +44,20 @@ class Products extends BaseController
                     $slug .= '-' . uniqid();
                 }
 
+                $detailsRaw = $this->request->getPost('details_json');
+                $detailsJson = is_array($detailsRaw) ? json_encode($detailsRaw) : $detailsRaw;
+
                 $data = [
                     'category_id'   => $this->request->getPost('category_id'),
+                    'product_type'  => $this->request->getPost('product_type') ?? 'art',
                     'title'         => $this->request->getPost('title'),
+                    'subtitle'      => $this->request->getPost('subtitle'),
                     'slug'          => $slug,
                     'description'   => $this->request->getPost('description'),
+                    'highlights'    => $this->request->getPost('highlights'),
+                    'features'      => $this->request->getPost('features'),
+                    'details_json'  => $detailsJson,
+                    'content'       => $this->request->getPost('content'),
                     'price'         => $this->request->getPost('price'),
                     'compare_price' => $this->request->getPost('compare_price') ?: null,
                     'tags'          => $this->request->getPost('tags'),
@@ -58,13 +67,16 @@ class Products extends BaseController
                     'status'        => $this->request->getPost('status') ?? 'active',
                 ];
 
+                $uploadPath = FCPATH . 'uploads/products';
+                if (!is_dir($uploadPath)) {
+                    mkdir($uploadPath, 0755, true);
+                }
+
                 $image = $this->request->getFile('image');
                 if ($image && $image->isValid() && !$image->hasMoved()) {
-                    $uploadPath = FCPATH . 'uploads/products';
-                    if (!is_dir($uploadPath)) {
-                        mkdir($uploadPath, 0755, true);
+                    if (!in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/webp'])) {
+                        return redirect()->back()->withInput()->with('error', 'Image must be JPG, PNG or WebP only.');
                     }
-
                     $newName = $slug . '_' . $image->getRandomName();
                     $image->move($uploadPath, $newName);
                     $data['image'] = $newName;
@@ -73,16 +85,25 @@ class Products extends BaseController
                     $wmName = 'wm_' . $newName;
                     $watermark->apply($uploadPath . '/' . $newName, $uploadPath . '/' . $wmName);
                     $data['image_watermarked'] = $wmName;
+                } elseif ($this->request->getFile('image') && $this->request->getFile('image')->getError() !== UPLOAD_ERR_NO_FILE) {
+                    return redirect()->back()->withInput()->with('error', 'Image upload failed. Check file size and type (max 40MB, jpg/png/webp only).');
                 }
 
                 $file = $this->request->getFile('file');
                 if ($file && $file->isValid() && !$file->hasMoved()) {
-                    if (!is_dir($uploadPath)) {
-                        mkdir($uploadPath, 0755, true);
+                    $allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/zip', 'application/pdf', 'image/tiff', 'image/vnd.adobe.photoshop'];
+                    if (!in_array($file->getMimeType(), $allowedTypes)) {
+                        return redirect()->back()->withInput()->with('error', 'Product file must be JPG, PNG, WebP, TIFF, PSD, ZIP or PDF.');
+                    }
+                    $filePath = WRITEPATH . 'uploads/products';
+                    if (!is_dir($filePath)) {
+                        mkdir($filePath, 0755, true);
                     }
                     $fileName = $slug . '_' . $file->getRandomName();
-                    $file->move($uploadPath, $fileName);
+                    $file->move($filePath, $fileName);
                     $data['file'] = $fileName;
+                } elseif ($this->request->getFile('file') && $this->request->getFile('file')->getError() !== UPLOAD_ERR_NO_FILE) {
+                    return redirect()->back()->withInput()->with('error', 'File upload failed. Check file size (max 40MB).');
                 }
 
                 $this->productModel->save($data);
@@ -111,11 +132,20 @@ class Products extends BaseController
                 $slug .= '-' . uniqid();
             }
 
+            $detailsRaw = $this->request->getPost('details_json');
+            $detailsJson = is_array($detailsRaw) ? json_encode($detailsRaw) : $detailsRaw;
+
             $data = [
                 'category_id'   => $this->request->getPost('category_id'),
+                'product_type'  => $this->request->getPost('product_type') ?? 'art',
                 'title'         => $this->request->getPost('title'),
+                'subtitle'      => $this->request->getPost('subtitle'),
                 'slug'          => $slug,
                 'description'   => $this->request->getPost('description'),
+                'highlights'    => $this->request->getPost('highlights'),
+                'features'      => $this->request->getPost('features'),
+                'details_json'  => $detailsJson,
+                'content'       => $this->request->getPost('content'),
                 'price'         => $this->request->getPost('price'),
                 'compare_price' => $this->request->getPost('compare_price') ?: null,
                 'tags'          => $this->request->getPost('tags'),
@@ -125,18 +155,23 @@ class Products extends BaseController
                 'status'        => $this->request->getPost('status') ?? 'active',
             ];
 
+            $uploadPath = FCPATH . 'uploads/products';
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0755, true);
+            }
+
             $image = $this->request->getFile('image');
             if ($image && $image->isValid() && !$image->hasMoved()) {
-                $uploadPath = FCPATH . 'uploads/products';
-                if (!is_dir($uploadPath)) {
-                    mkdir($uploadPath, 0755, true);
+                if (!in_array($image->getMimeType(), ['image/jpeg', 'image/png', 'image/webp'])) {
+                    return redirect()->back()->withInput()->with('error', 'Image must be JPG, PNG or WebP only.');
                 }
-
-                if ($product['image'] && file_exists($uploadPath . '/' . $product['image'])) {
-                    unlink($uploadPath . '/' . $product['image']);
+                $oldImage = basename($product['image'] ?? '');
+                $oldWatermarked = basename($product['image_watermarked'] ?? '');
+                if ($oldImage && file_exists($uploadPath . '/' . $oldImage)) {
+                    unlink($uploadPath . '/' . $oldImage);
                 }
-                if ($product['image_watermarked'] && file_exists($uploadPath . '/' . $product['image_watermarked'])) {
-                    unlink($uploadPath . '/' . $product['image_watermarked']);
+                if ($oldWatermarked && file_exists($uploadPath . '/' . $oldWatermarked)) {
+                    unlink($uploadPath . '/' . $oldWatermarked);
                 }
 
                 $newName = $slug . '_' . $image->getRandomName();
@@ -147,23 +182,38 @@ class Products extends BaseController
                 $wmName = 'wm_' . $newName;
                 $watermark->apply($uploadPath . '/' . $newName, $uploadPath . '/' . $wmName);
                 $data['image_watermarked'] = $wmName;
+            } elseif ($image && $image->getError() !== UPLOAD_ERR_NO_FILE) {
+                return redirect()->back()->withInput()->with('error', 'Image upload failed: ' . $image->getErrorString());
             }
 
             $file = $this->request->getFile('file');
             if ($file && $file->isValid() && !$file->hasMoved()) {
-                $uploadPath = FCPATH . 'uploads/products';
-                if (!is_dir($uploadPath)) {
-                    mkdir($uploadPath, 0755, true);
+                $allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/zip', 'application/pdf', 'image/tiff', 'image/vnd.adobe.photoshop'];
+                if (!in_array($file->getMimeType(), $allowedTypes)) {
+                    return redirect()->back()->withInput()->with('error', 'Product file must be JPG, PNG, WebP, TIFF, PSD, ZIP or PDF.');
                 }
-                if ($product['file'] && file_exists($uploadPath . '/' . $product['file'])) {
-                    unlink($uploadPath . '/' . $product['file']);
+                $filePath = WRITEPATH . 'uploads/products';
+                if (!is_dir($filePath)) {
+                    mkdir($filePath, 0755, true);
+                }
+                $oldFile = basename($product['file'] ?? '');
+                if ($oldFile && file_exists(WRITEPATH . 'uploads/products/' . $oldFile)) {
+                    unlink(WRITEPATH . 'uploads/products/' . $oldFile);
+                } elseif ($oldFile && file_exists($uploadPath . '/' . $oldFile)) {
+                    unlink($uploadPath . '/' . $oldFile);
                 }
                 $fileName = $slug . '_' . $file->getRandomName();
-                $file->move($uploadPath, $fileName);
+                $file->move($filePath, $fileName);
                 $data['file'] = $fileName;
+            } elseif ($file && $file->getError() !== UPLOAD_ERR_NO_FILE) {
+                return redirect()->back()->withInput()->with('error', 'File upload failed: ' . $file->getErrorString());
             }
 
-            $this->productModel->update($id, $data);
+            if ($this->productModel->update($id, $data) === false) {
+                $errors = $this->productModel->errors();
+                return redirect()->back()->withInput()->with('errors', $errors ?: ['Update failed, please check your input']);
+            }
+
             return redirect()->to('/admin/products')->with('message', 'Product updated successfully');
         }
 
@@ -175,17 +225,27 @@ class Products extends BaseController
 
     public function delete($id = null)
     {
+        if (!$this->request->is('post')) {
+            return redirect()->to('/admin/products')->with('error', 'Invalid request');
+        }
+
         $product = $this->productModel->find($id);
         if ($product) {
             $uploadPath = FCPATH . 'uploads/products';
-            if ($product['image'] && file_exists($uploadPath . '/' . $product['image'])) {
-                unlink($uploadPath . '/' . $product['image']);
+            $filePath = WRITEPATH . 'uploads/products';
+            $oldImage = basename($product['image'] ?? '');
+            $oldWatermarked = basename($product['image_watermarked'] ?? '');
+            $oldFile = basename($product['file'] ?? '');
+            if ($oldImage && file_exists($uploadPath . '/' . $oldImage)) {
+                unlink($uploadPath . '/' . $oldImage);
             }
-            if ($product['image_watermarked'] && file_exists($uploadPath . '/' . $product['image_watermarked'])) {
-                unlink($uploadPath . '/' . $product['image_watermarked']);
+            if ($oldWatermarked && file_exists($uploadPath . '/' . $oldWatermarked)) {
+                unlink($uploadPath . '/' . $oldWatermarked);
             }
-            if ($product['file'] && file_exists($uploadPath . '/' . $product['file'])) {
-                unlink($uploadPath . '/' . $product['file']);
+            if ($oldFile && file_exists($filePath . '/' . $oldFile)) {
+                unlink($filePath . '/' . $oldFile);
+            } elseif ($oldFile && file_exists($uploadPath . '/' . $oldFile)) {
+                unlink($uploadPath . '/' . $oldFile);
             }
             $this->productModel->delete($id);
         }

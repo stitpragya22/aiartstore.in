@@ -46,7 +46,12 @@
                     <div class="mb-2"><small class="text-muted">Payment</small><br><span class="badge-status <?= $order['payment_status'] === 'completed' ? 'completed' : 'pending' ?>"><?= ucfirst($order['payment_status']) ?></span></div>
                     <div class="mb-2"><small class="text-muted">Order Status</small><br><span class="badge-status <?= $order['status'] ?>"><?= ucfirst($order['status']) ?></span></div>
                     <?php if ($order['invoice_no']): ?>
-                    <div class="mb-2"><small class="text-muted">Invoice</small><br><strong><?= esc($order['invoice_no']) ?></strong></div>
+                    <div class="mb-2"><small class="text-muted">Invoice</small><br>
+                        <a href="<?= site_url('/download/invoice/' . $order['id']) ?>" class="text-decoration-none">
+                            <strong><?= esc($order['invoice_no']) ?></strong>
+                            <i class="bi bi-download ms-1" style="color: var(--accent-primary);"></i>
+                        </a>
+                    </div>
                     <?php endif; ?>
                 </div>
 
@@ -54,9 +59,20 @@
                 <div class="stat-card mt-3">
                     <h6 class="fw-bold mb-3"><i class="bi bi-download me-2" style="color: var(--success);"></i>Downloads</h6>
                     <?php foreach ($order['items'] as $item): ?>
+                    <?php $download = $order['downloads'][$item['product_id']] ?? null; ?>
+                    <?php if ($download && $download['is_available']): ?>
+                    <a href="<?= site_url('/download/file/' . $download['download_token']) ?>" class="btn btn-outline-custom btn-sm w-100 mb-2">
+                        <i class="bi bi-download me-1"></i><?= esc($item['product_name']) ?>
+                    </a>
+                    <?php elseif ($download): ?>
+                    <span class="btn btn-outline-custom btn-sm w-100 mb-2 disabled" style="opacity: 0.5;">
+                        <i class="bi bi-x-circle me-1"></i><?= esc($item['product_name']) ?> (Expired)
+                    </span>
+                    <?php else: ?>
                     <a href="<?= site_url('/downloads') ?>" class="btn btn-outline-custom btn-sm w-100 mb-2">
                         <i class="bi bi-download me-1"></i><?= esc($item['product_name']) ?>
                     </a>
+                    <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
                 <?php endif; ?>

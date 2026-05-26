@@ -52,14 +52,19 @@ class Filters extends BaseFilters
     public array $required = [
         'before' => [
             'forcehttps', // Force Global Secure Requests
-            'pagecache',  // Web Page Caching
         ],
         'after' => [
-            'pagecache',   // Web Page Caching
             'performance', // Performance Metrics
-            'toolbar',     // Debug Toolbar
         ],
     ];
+
+    public function __construct()
+    {
+        parent::__construct();
+        if (ENVIRONMENT !== 'production') {
+            $this->required['after'][] = 'toolbar';
+        }
+    }
 
     /**
      * List of filter aliases that are always
@@ -72,13 +77,13 @@ class Filters extends BaseFilters
      */
     public array $globals = [
         'before' => [
+            'csrf' => ['except' => ['razorpay/webhook']],
             // 'honeypot',
-            // 'csrf',
             // 'invalidchars',
         ],
         'after' => [
+            'secureheaders',
             // 'honeypot',
-            // 'secureheaders',
         ],
     ];
 

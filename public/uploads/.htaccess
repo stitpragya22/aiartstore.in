@@ -1,0 +1,8 @@
+# Prevent direct PHP execution in uploads
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteRule \.(php|phtml|php3|php4|php5|php7|php8)$ - [F,L]
+</IfModule>
+
+# Disable directory listing
+Options -Indexes

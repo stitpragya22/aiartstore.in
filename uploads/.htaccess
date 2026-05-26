@@ -1,0 +1,15 @@
+# Block direct access to non-image files
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteCond %{REQUEST_URI} !\.(jpg|jpeg|png|webp|gif|svg|ico)$ [NC]
+    RewriteRule .* - [F,L]
+</IfModule>
+
+# Directory listing off
+Options -Indexes
+
+# Deny access to dotfiles
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

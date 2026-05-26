@@ -10,14 +10,16 @@ class ProductModel extends Model
     protected $primaryKey       = 'id';
     protected $useSoftDeletes   = false;
     protected $allowedFields    = [
-        'category_id', 'title', 'slug', 'description', 'price', 'compare_price',
+        'category_id', 'product_type', 'title', 'subtitle', 'slug', 'description',
+        'highlights', 'features', 'details_json', 'content', 'preview_files',
+        'price', 'compare_price',
         'image', 'image_watermarked', 'file', 'file_size', 'dimensions', 'tags',
         'is_featured', 'is_digital', 'status'
     ];
     protected $useTimestamps    = true;
     protected $validationRules  = [
         'title'       => 'required|min_length[3]|max_length[255]',
-        'slug'        => 'required|min_length[3]|max_length[255]|is_unique[products.slug,id,{id}]',
+        'slug'        => 'required|min_length[3]|max_length[255]',
         'price'       => 'required|numeric',
         'category_id' => 'permit_empty|is_natural_no_zero',
     ];
@@ -34,7 +36,7 @@ class ProductModel extends Model
 
     public function getActive()
     {
-        return $this->select('products.*, categories.name as category_name')
+        return $this->select('products.*, categories.name as category_name, categories.slug as category_slug')
             ->join('categories', 'categories.id = products.category_id', 'left')
             ->where('products.status', 'active')
             ->orderBy('products.id', 'DESC');
@@ -47,6 +49,16 @@ class ProductModel extends Model
             ->where('products.slug', $slug)
             ->where('products.status', 'active')
             ->first();
+    }
+
+    public function getMaxPrice($categoryId = null)
+    {
+        $this->select('MAX(products.price) as max_price')->where('products.status', 'active');
+        if ($categoryId) {
+            $this->where('products.category_id', $categoryId);
+        }
+        $row = $this->first();
+        return $row ? (float)$row['max_price'] : 0;
     }
 
     public function search($query)

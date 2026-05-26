@@ -21,6 +21,56 @@
             </div>
         </div>
     </div>
+    <div class="col-lg-12">
+        <div class="card-admin">
+            <h5 class="fw-bold mb-3">Download Access</h5>
+            <?php if (empty($order['downloads'])): ?>
+                <p class="text-muted mb-0">No download records for this order.</p>
+            <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-admin">
+                    <thead><tr><th>Product</th><th>Used</th><th>Expires</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        <?php foreach ($order['downloads'] as $download): ?>
+                        <?php
+                            $isRevoked = !empty($download['revoked_at']);
+                            $isExpired = !empty($download['expires_at']) && strtotime($download['expires_at']) < time();
+                        ?>
+                        <tr>
+                            <td><?= esc($download['product_title']) ?></td>
+                            <td><?= (int)$download['download_count'] ?> / <?= (int)$download['max_downloads'] ?: 'Unlimited' ?></td>
+                            <td><?= $download['expires_at'] ? date('d M Y', strtotime($download['expires_at'])) : 'Never' ?></td>
+                            <td>
+                                <?php if ($isRevoked): ?>
+                                    <span class="badge-status cancelled">Revoked</span>
+                                <?php elseif ($isExpired): ?>
+                                    <span class="badge-status pending">Expired</span>
+                                <?php else: ?>
+                                    <span class="badge-status completed">Active</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <form action="<?= site_url('/admin/orders/reissue-download/' . $download['id']) ?>" method="POST">
+                                        <?= csrf_field() ?>
+                                        <button class="btn btn-sm btn-primary-custom" type="submit">Reissue</button>
+                                    </form>
+                                    <?php if (!$isRevoked): ?>
+                                    <form action="<?= site_url('/admin/orders/revoke-download/' . $download['id']) ?>" method="POST">
+                                        <?= csrf_field() ?>
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">Revoke</button>
+                                    </form>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
     <div class="col-lg-4">
         <div class="card-admin">
             <h5 class="fw-bold mb-3">Order Details</h5>
@@ -39,6 +89,7 @@
             <?php endif; ?>
             <hr style="border-color: var(--border-color);">
             <form action="<?= site_url('/admin/orders/update-status/' . $order['id']) ?>" method="POST">
+                <?= csrf_field() ?>
                 <label class="form-label fw-semibold">Update Status</label>
                 <div class="d-flex gap-2">
                     <select name="status" class="form-select">

@@ -16,10 +16,10 @@
                     <a href="<?= site_url('/shop') ?>" class="btn btn-primary-custom btn-lg"><i class="bi bi-grid me-2"></i>Browse Gallery</a>
                     <a href="#featured" class="btn btn-outline-custom btn-lg"><i class="bi bi-star me-2"></i>Featured Art</a>
                 </div>
-                <div class="d-flex gap-4 mt-5">
-                    <div><span class="stat-number fs-3 fw-bold" style="background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">500+</span><br><span class="text-muted small">Artworks</span></div>
-                    <div><span class="stat-number fs-3 fw-bold" style="background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">50+</span><br><span class="text-muted small">Artists</span></div>
-                    <div><span class="stat-number fs-3 fw-bold" style="background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">1000+</span><br><span class="text-muted small">Happy Customers</span></div>
+                <div class="d-flex gap-3 gap-md-4 mt-4 mt-md-5">
+                    <div><span class="stat-number fs-5 fs-md-3 fw-bold" style="background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">500+</span><br><span class="text-muted small">Artworks</span></div>
+                    <div><span class="stat-number fs-5 fs-md-3 fw-bold" style="background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">50+</span><br><span class="text-muted small">Artists</span></div>
+                    <div><span class="stat-number fs-5 fs-md-3 fw-bold" style="background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">1000+</span><br><span class="text-muted small">Happy Customers</span></div>
                 </div>
             </div>
             <div class="col-lg-6 mt-5 mt-lg-0">
@@ -49,7 +49,7 @@
         <div class="row g-3">
             <?php foreach ($categories as $cat): ?>
             <div class="col-6 col-md-4 col-lg-2">
-                <a href="<?= site_url('/shop?category=' . $cat['id']) ?>" class="text-decoration-none">
+                <a href="<?= site_url('/shop/category/' . $cat['slug']) ?>" class="text-decoration-none">
                     <div class="stat-card">
                         <i class="bi bi-palette fs-2" style="color: var(--accent-primary);"></i>
                         <h6 class="mt-2 mb-0"><?= esc($cat['name']) ?></h6>
@@ -77,13 +77,13 @@
             <?php foreach ($featured as $product): ?>
             <div class="col-md-6 col-lg-3">
                 <div class="card-art position-relative">
-                    <div class="position-relative overflow-hidden">
-                        <?php if ($product['image_watermarked']): ?>
-                            <img src="<?= base_url('uploads/products/') ?><?= $product['image_watermarked'] ?>" class="art-image w-100" alt="<?= esc($product['title']) ?>">
-                        <?php elseif ($product['image']): ?>
-                            <img src="<?= base_url('uploads/products/') ?><?= $product['image'] ?>" class="art-image w-100" alt="<?= esc($product['title']) ?>" style="filter: blur(4px);">
+                    <div class="art-image-wrapper">
+                        <?php $img = $product['image_watermarked'] ? base_url('uploads/products/' . $product['image_watermarked']) : ($product['image'] ? base_url('uploads/products/' . $product['image']) : null); ?>
+                        <?php if ($img): ?>
+                            <div class="art-image-bg" style="background-image: url('<?= str_replace("'", "%27", $img) ?>')"></div>
+                            <img src="<?= $img ?>" class="art-image" alt="<?= esc($product['title']) ?>">
                         <?php else: ?>
-                            <div class="art-image w-100 d-flex align-items-center justify-content-center" style="background: var(--bg-card);"><i class="bi bi-image fs-1 text-muted"></i></div>
+                            <div class="art-image-placeholder"><i class="bi bi-image"></i></div>
                         <?php endif; ?>
                         <div class="watermark-badge"><i class="bi bi-water me-1"></i>Preview</div>
                         <div class="art-overlay">
@@ -95,7 +95,11 @@
                         <h6 class="mt-1 fw-semibold"><?= esc($product['title']) ?></h6>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="price-tag"><?= formatPrice($product['price']) ?></span>
+                            <?php if (isProductPurchased($product['id'])): ?>
+                                <span class="badge" style="background: rgba(34,197,94,0.2); color: var(--success); border-radius: 20px;"><i class="bi bi-check-circle me-1"></i>Owned</span>
+                            <?php else: ?>
                             <button class="btn btn-sm btn-outline-custom add-to-cart" data-id="<?= $product['id'] ?>"><i class="bi bi-cart-plus"></i></button>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -119,13 +123,13 @@
             <?php foreach ($latest as $product): ?>
             <div class="col-md-6 col-lg-3">
                 <div class="card-art position-relative">
-                    <div class="position-relative overflow-hidden">
-                        <?php if ($product['image_watermarked']): ?>
-                            <img src="<?= base_url('uploads/products/') ?><?= $product['image_watermarked'] ?>" class="art-image w-100" alt="<?= esc($product['title']) ?>">
-                        <?php elseif ($product['image']): ?>
-                            <img src="<?= base_url('uploads/products/') ?><?= $product['image'] ?>" class="art-image w-100" alt="<?= esc($product['title']) ?>" style="filter: blur(4px);">
+                    <div class="art-image-wrapper">
+                        <?php $img = $product['image_watermarked'] ? base_url('uploads/products/' . $product['image_watermarked']) : ($product['image'] ? base_url('uploads/products/' . $product['image']) : null); ?>
+                        <?php if ($img): ?>
+                            <div class="art-image-bg" style="background-image: url('<?= str_replace("'", "%27", $img) ?>')"></div>
+                            <img src="<?= $img ?>" class="art-image" alt="<?= esc($product['title']) ?>">
                         <?php else: ?>
-                            <div class="art-image w-100 d-flex align-items-center justify-content-center" style="background: var(--bg-card);"><i class="bi bi-image fs-1 text-muted"></i></div>
+                            <div class="art-image-placeholder"><i class="bi bi-image"></i></div>
                         <?php endif; ?>
                         <div class="watermark-badge"><i class="bi bi-water me-1"></i>Preview</div>
                         <div class="art-overlay">
@@ -137,7 +141,11 @@
                         <h6 class="mt-1 fw-semibold"><?= esc($product['title']) ?></h6>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="price-tag"><?= formatPrice($product['price']) ?></span>
+                            <?php if (isProductPurchased($product['id'])): ?>
+                                <span class="badge" style="background: rgba(34,197,94,0.2); color: var(--success); border-radius: 20px;"><i class="bi bi-check-circle me-1"></i>Owned</span>
+                            <?php else: ?>
                             <button class="btn btn-sm btn-outline-custom add-to-cart" data-id="<?= $product['id'] ?>"><i class="bi bi-cart-plus"></i></button>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -181,14 +189,18 @@ $(document).ready(function() {
     $('.add-to-cart').click(function() {
         var btn = $(this);
         var id = btn.data('id');
+        btn.prop('disabled', true);
         $.post('<?= site_url('/cart/add') ?>', { id: id, quantity: 1 }, function(res) {
             if (res.status === 'success') {
                 $('#cartCount').text(res.count);
-                btn.html('<i class="bi bi-check"></i>').removeClass('btn-outline-custom').addClass('btn-primary-custom');
-                setTimeout(function() {
-                    btn.html('<i class="bi bi-cart-plus"></i>').addClass('btn-outline-custom').removeClass('btn-primary-custom');
-                }, 2000);
+                showToast('Added to cart!', 'success');
+            } else {
+                showToast(res.message || 'Failed to add', 'error');
             }
+            btn.prop('disabled', false);
+        }).fail(function() {
+            showToast('Something went wrong', 'error');
+            btn.prop('disabled', false);
         });
     });
 });

@@ -14,10 +14,11 @@ class GoogleAuth extends BaseController
     {
         $config = config(GoogleAuthConfig::class);
 
-        $client = new \Google\Client();
-        $client->setClientId($config->clientId);
-        $client->setClientSecret($config->clientSecret);
-        $client->setRedirectUri($config->redirectUri);
+        if (! $this->isConfigured($config)) {
+            return redirect()->to('/login')->with('error', 'Google login is not configured yet.');
+        }
+
+        $client = $this->createClient($config);
         $client->setScopes($config->scopes);
         $client->setAccessType('offline');
         $client->setPrompt('select_account');
@@ -31,6 +32,10 @@ class GoogleAuth extends BaseController
     {
         $config = config(GoogleAuthConfig::class);
 
+        if (! $this->isConfigured($config)) {
+            return redirect()->to('/login')->with('error', 'Google login is not configured yet.');
+        }
+
         $code = $this->request->getGet('code');
 
         if (!$code) {
@@ -38,10 +43,7 @@ class GoogleAuth extends BaseController
         }
 
         try {
-            $client = new \Google\Client();
-            $client->setClientId($config->clientId);
-            $client->setClientSecret($config->clientSecret);
-            $client->setRedirectUri($config->redirectUri);
+            $client = $this->createClient($config);
 
             $token = $client->fetchAccessTokenWithAuthCode($code);
 
@@ -149,5 +151,28 @@ class GoogleAuth extends BaseController
         }
 
         return $username;
+    }
+
+    private function isConfigured(GoogleAuthConfig $config): bool
+    {
+        return $config->clientId !== ''
+            && $config->clientSecret !== '';
+    }
+
+    private function createClient(GoogleAuthConfig $config): \Google\Client
+    {
+        $client = new \Google\Client();
+        $client->setClientId($config->clientId);
+        $client->setClientSecret($config->clientSecret);
+        $client->setRedirectUri($this->getRedirectUri($config));
+
+        return $client;
+    }
+
+    private function getRedirectUri(GoogleAuthConfig $config): string
+    {
+        return $config->redirectUri !== ''
+            ? $config->redirectUri
+            : site_url('auth/google/callback');
     }
 }

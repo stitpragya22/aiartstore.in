@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title ?? 'Dashboard' ?> | AI Art Store Admin</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="csrf-token" content="<?= csrf_hash() ?>">
+    <title><?= esc($title ?? 'Dashboard') ?> | AI Art Store Admin</title>
+    <link rel="icon" type="image/png" href="<?= base_url('/favicon.png') ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -115,6 +118,12 @@
             padding: 1.5rem;
         }
 
+        @media (max-width: 991px) {
+            .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            #sidebarToggle.active { left: 262px; transition: left 0.3s ease; }
+        }
         .stat-card-admin .stat-icon {
             width: 48px;
             height: 48px;
@@ -217,6 +226,9 @@
     </style>
 </head>
 <body>
+    <button id="sidebarToggle" class="btn d-lg-none" style="position:fixed;top:12px;left:12px;z-index:1100;background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-color);border-radius:10px;padding:6px 10px;" onclick="$('.sidebar').toggleClass('open');$(this).toggleClass('active')">
+        <i class="bi bi-list fs-5"></i>
+    </button>
     <aside class="sidebar">
         <a href="<?= site_url('/admin') ?>" class="sidebar-brand"><i class="bi bi-stars me-2"></i>AI Art Store</a>
         <nav>
@@ -245,6 +257,31 @@
                     <i class="bi bi-people"></i>Users
                 </a>
             </div>
+            <div class="nav-item">
+                <a href="<?= site_url('/admin/settings') ?>" class="nav-link <?= strpos(current_url(), '/admin/settings') !== false ? 'active' : '' ?>">
+                    <i class="bi bi-gear"></i>Settings
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="<?= site_url('/admin/blog/posts') ?>" class="nav-link <?= strpos(current_url(), '/admin/blog/posts') !== false ? 'active' : '' ?>">
+                    <i class="bi bi-pencil-square"></i>Blog Posts
+                </a>
+            </div>
+            <div class="nav-item" style="padding-left: 2.3rem;">
+                <a href="<?= site_url('/admin/blog/categories') ?>" class="nav-link <?= strpos(current_url(), '/admin/blog/categories') !== false ? 'active' : '' ?>" style="font-size:0.85rem;">
+                    <i class="bi bi-tag"></i>Categories
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="<?= site_url('/admin/landing-pages') ?>" class="nav-link <?= strpos(current_url(), '/admin/landing-pages') !== false ? 'active' : '' ?>">
+                    <i class="bi bi-megaphone"></i>Landing Pages
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="<?= site_url('/admin/coupons') ?>" class="nav-link <?= strpos(current_url(), '/admin/coupons') !== false ? 'active' : '' ?>">
+                    <i class="bi bi-percent"></i>Coupons
+                </a>
+            </div>
             <hr style="border-color: var(--border-color);">
             <div class="nav-item">
                 <a href="<?= site_url('/') ?>" class="nav-link"><i class="bi bi-house"></i>View Site</a>
@@ -257,7 +294,7 @@
 
     <div class="main-content">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="page-title mb-0"><?= $title ?? 'Dashboard' ?></h1>
+            <h1 class="page-title mb-0"><?= esc($title ?? 'Dashboard') ?></h1>
             <div>
                 <a href="<?= site_url('/') ?>" class="btn btn-outline-custom btn-sm me-2"><i class="bi bi-house"></i> View Site</a>
                 <a href="<?= site_url('/logout') ?>" class="btn btn-outline-custom btn-sm"><i class="bi bi-box-arrow-right"></i> Logout</a>
@@ -265,11 +302,11 @@
         </div>
 
         <?php if (session()->has('message')): ?>
-            <div class="alert alert-custom alert-success d-flex align-items-center mb-4"><i class="bi bi-check-circle-fill me-2"></i><?= session('message') ?></div>
+            <div class="alert alert-custom alert-success d-flex align-items-center mb-4"><i class="bi bi-check-circle-fill me-2"></i><?= esc(session('message')) ?></div>
         <?php endif; ?>
         <?php if (session()->has('error')): ?>
-            <div class="alert alert-custom alert-danger d-flex align-items-center mb-4"><i class="bi bi-exclamation-circle-fill me-2"></i><?= session('error') ?></div>
+            <div class="alert alert-custom alert-danger d-flex align-items-center mb-4"><i class="bi bi-exclamation-circle-fill me-2"></i><?= esc(session('error')) ?></div>
         <?php endif; ?>
         <?php if (session()->has('errors')): ?>
-            <div class="alert alert-custom alert-danger mb-4"><i class="bi bi-exclamation-triangle-fill me-2"></i><?= implode('<br>', session('errors')) ?></div>
+            <div class="alert alert-custom alert-danger mb-4"><i class="bi bi-exclamation-triangle-fill me-2"></i><?= implode('<br>', array_map('esc', session('errors') ?? [])) ?></div>
         <?php endif; ?>

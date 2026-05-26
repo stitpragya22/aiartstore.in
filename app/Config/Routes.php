@@ -12,34 +12,60 @@ service('auth')->routes($routes);
 // Home
 $routes->get('/', 'Home::index');
 
+// Blog (public)
+$routes->get('/blog', 'Blog::index');
+$routes->get('/blog/(:any)', 'Blog::detail/$1');
+
 // Shop / Gallery
 $routes->get('/shop', 'Shop::index');
+$routes->get('/shop/category/(:segment)', 'Shop::category/$1');
 $routes->get('/shop/(:segment)', 'Shop::detail/$1');
+$routes->post('/shop/review/(:num)', 'Shop::submitReview/$1');
 
 // Google Auth
+$routes->get('/auth/google/login', 'GoogleAuth::login');
+$routes->get('/auth/google/callback', 'GoogleAuth::callback');
 $routes->get('/google-auth/login', 'GoogleAuth::login');
 $routes->get('/google-auth/callback', 'GoogleAuth::callback');
 
 // Cart
 $routes->get('/cart', 'Cart::index');
 $routes->post('/cart/add', 'Cart::add');
+$routes->post('/cart/buy-now', 'Cart::buyNow');
 $routes->post('/cart/update', 'Cart::update');
-$routes->get('/cart/remove/(:num)', 'Cart::remove/$1');
+$routes->post('/cart/remove/(:num)', 'Cart::remove/$1');
 $routes->get('/cart/count', 'Cart::count');
 
 // Checkout
 $routes->get('/checkout', 'Checkout::index');
 $routes->post('/checkout/createOrder', 'Checkout::createOrder');
 $routes->post('/checkout/verify', 'Checkout::verify');
+$routes->post('/razorpay/webhook', 'Checkout::webhook');
 
-// Orders (must be after google-auth routes to avoid conflict)
-$routes->get('/orders', 'Orders::index');
-$routes->get('/orders/(:any)', 'Orders::detail/$1');
+// Coupon validation (AJAX)
+$routes->post('/checkout/validate-coupon', 'Checkout::validateCoupon');
 
-// Downloads
-$routes->get('/downloads', 'Download::index');
-$routes->get('/download/file/(:num)/(:num)', 'Download::file/$1/$2');
-$routes->get('/download/invoice/(:num)', 'Download::invoice/$1');
+// Orders / Downloads
+$routes->group('', ['filter' => 'session'], static function ($routes) {
+    $routes->get('/orders', 'Orders::index');
+    $routes->get('/orders/(:any)', 'Orders::detail/$1');
+    $routes->get('/downloads', 'Download::index');
+    $routes->get('/download/file/(:segment)', 'Download::fileByToken/$1');
+    $routes->get('/download/file/(:num)/(:num)', 'Download::file/$1/$2');
+    $routes->get('/download/invoice/(:num)', 'Download::invoice/$1');
+});
+
+// Sitemaps / Feeds
+$routes->get('/sitemap.xml', 'Sitemap::index');
+$routes->get('/feed/products.xml', 'Sitemap::feed');
+$routes->get('/feed/products.csv', 'Sitemap::feedCsv');
+
+// Legal Pages
+$routes->get('/terms', 'Pages::terms');
+$routes->get('/privacy', 'Pages::privacy');
+$routes->get('/refund', 'Pages::refund');
+$routes->get('/faq', 'Pages::faq');
+$routes->get('/contact', 'Pages::contact');
 
 // Admin Routes
 $routes->group('admin', ['filter' => 'group:superadmin,admin,developer'], function($routes) {
@@ -50,19 +76,58 @@ $routes->group('admin', ['filter' => 'group:superadmin,admin,developer'], functi
     $routes->post('products/create', 'Admin\Products::create');
     $routes->get('products/edit/(:num)', 'Admin\Products::edit/$1');
     $routes->post('products/edit/(:num)', 'Admin\Products::edit/$1');
-    $routes->get('products/delete/(:num)', 'Admin\Products::delete/$1');
+    $routes->post('products/delete/(:num)', 'Admin\Products::delete/$1');
 
     $routes->get('categories', 'Admin\Categories::index');
     $routes->get('categories/create', 'Admin\Categories::create');
     $routes->post('categories/create', 'Admin\Categories::create');
     $routes->get('categories/edit/(:num)', 'Admin\Categories::edit/$1');
     $routes->post('categories/edit/(:num)', 'Admin\Categories::edit/$1');
-    $routes->get('categories/delete/(:num)', 'Admin\Categories::delete/$1');
+    $routes->post('categories/delete/(:num)', 'Admin\Categories::delete/$1');
 
     $routes->get('orders', 'Admin\Orders::index');
     $routes->get('orders/(:num)', 'Admin\Orders::detail/$1');
     $routes->post('orders/update-status/(:num)', 'Admin\Orders::updateStatus/$1');
+    $routes->post('orders/reissue-download/(:num)', 'Admin\Orders::reissueDownload/$1');
+    $routes->post('orders/revoke-download/(:num)', 'Admin\Orders::revokeDownload/$1');
+
+    $routes->get('settings', 'Admin\Settings::index');
+    $routes->post('settings', 'Admin\Settings::index');
 
     $routes->get('users', 'Admin\Users::index');
     $routes->post('users/toggle-group/(:num)', 'Admin\Users::toggleGroup/$1');
+
+    // Blog
+    $routes->get('blog/categories', 'Admin\Blog::categories');
+    $routes->get('blog/categories/create', 'Admin\Blog::categoryCreate');
+    $routes->post('blog/categories/create', 'Admin\Blog::categoryCreate');
+    $routes->get('blog/categories/edit/(:num)', 'Admin\Blog::categoryEdit/$1');
+    $routes->post('blog/categories/edit/(:num)', 'Admin\Blog::categoryEdit/$1');
+    $routes->post('blog/categories/delete/(:num)', 'Admin\Blog::categoryDelete/$1');
+
+    $routes->get('blog/posts', 'Admin\Blog::posts');
+    $routes->get('blog/posts/create', 'Admin\Blog::postCreate');
+    $routes->post('blog/posts/create', 'Admin\Blog::postCreate');
+    $routes->get('blog/posts/edit/(:num)', 'Admin\Blog::postEdit/$1');
+    $routes->post('blog/posts/edit/(:num)', 'Admin\Blog::postEdit/$1');
+    $routes->post('blog/posts/delete/(:num)', 'Admin\Blog::postDelete/$1');
+
+    // Coupons
+    $routes->get('coupons', 'Admin\Coupons::index');
+    $routes->get('coupons/create', 'Admin\Coupons::create');
+    $routes->post('coupons/create', 'Admin\Coupons::create');
+    $routes->get('coupons/edit/(:num)', 'Admin\Coupons::edit/$1');
+    $routes->post('coupons/edit/(:num)', 'Admin\Coupons::edit/$1');
+    $routes->post('coupons/delete/(:num)', 'Admin\Coupons::delete/$1');
+
+    // Landing Pages
+    $routes->get('landing-pages', 'Admin\LandingPages::index');
+    $routes->get('landing-pages/create', 'Admin\LandingPages::create');
+    $routes->post('landing-pages/create', 'Admin\LandingPages::create');
+    $routes->get('landing-pages/edit/(:num)', 'Admin\LandingPages::edit/$1');
+    $routes->post('landing-pages/edit/(:num)', 'Admin\LandingPages::edit/$1');
+    $routes->post('landing-pages/delete/(:num)', 'Admin\LandingPages::delete/$1');
 });
+
+// Landing Pages (public)
+$routes->get('/lp/(:any)', 'LandingPage::index/$1');

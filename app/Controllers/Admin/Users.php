@@ -16,12 +16,32 @@ class Users extends BaseController
 
     public function toggleGroup($id = null)
     {
+        $currentUser = auth()->user();
+
+        $allowedGroups = ['admin', 'developer'];
+
+        $group = $this->request->getPost('group');
+
+        if (!$currentUser->inGroup('superadmin')) {
+            return redirect()->to('/admin/users')->with('error', 'Only superadmin can manage user groups');
+        }
+
+        if ((int) $id === (int) $currentUser->id) {
+            return redirect()->to('/admin/users')->with('error', 'Cannot modify your own group');
+        }
+
+        if ($group === 'superadmin') {
+            return redirect()->to('/admin/users')->with('error', 'Cannot assign superadmin group via this interface');
+        }
+
+        if (!in_array($group, $allowedGroups, true)) {
+            return redirect()->to('/admin/users')->with('error', 'Invalid group');
+        }
+
         $user = auth()->getProvider()->findById($id);
         if (!$user) {
             return redirect()->to('/admin/users')->with('error', 'User not found');
         }
-
-        $group = $this->request->getPost('group');
 
         if ($user->inGroup($group)) {
             $user->removeGroup($group);

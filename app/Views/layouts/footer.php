@@ -23,10 +23,10 @@
                 <div class="col-md-2">
                     <h6 class="fw-bold mb-3">Support</h6>
                     <ul class="list-unstyled text-muted">
-                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">FAQ</a></li>
-                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Terms</a></li>
-                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Privacy</a></li>
-                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Contact</a></li>
+                        <li class="mb-2"><a href="<?= site_url('/faq') ?>" class="text-decoration-none text-muted">FAQ</a></li>
+                        <li class="mb-2"><a href="<?= site_url('/terms') ?>" class="text-decoration-none text-muted">Terms</a></li>
+                        <li class="mb-2"><a href="<?= site_url('/privacy') ?>" class="text-decoration-none text-muted">Privacy</a></li>
+                        <li class="mb-2"><a href="<?= site_url('/refund') ?>" class="text-decoration-none text-muted">Refund</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">
@@ -44,18 +44,69 @@
         </div>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
-        $(document).ready(function() {
-            $('[data-bs-toggle="tooltip"]').tooltip();
-            setTimeout(function() { $('.alert-custom').fadeOut(500); }, 5000);
+        $.ajaxSetup({
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
         });
+
+        function showToast(msg, type) {
+            var bg = type === 'error' ? 'linear-gradient(135deg, #ef4444, #dc2626)' :
+                      type === 'success' ? 'linear-gradient(135deg, #22c55e, #16a34a)' :
+                      'linear-gradient(135deg, #8b5cf6, #6366f1)';
+            Toastify({ text: msg, duration: 4000, gravity: 'top', position: 'right',
+                stopOnFocus: true, style: { background: bg, borderRadius: '12px',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.3)', fontSize: '0.9rem' } }).showToast();
+        }
 
         function updateCartCount() {
             $.get('<?= site_url('/cart/count') ?>', function(data) {
                 $('#cartCount').text(data.count);
+            }).fail(function() {
+                console.error('Failed to update cart count');
             });
         }
+    </script>
+
+    <!-- Mobile App-Style Bottom Navigation -->
+    <nav class="app-bottom-nav d-md-none">
+        <a href="<?= site_url('/') ?>" class="<?= current_url() == site_url('/') ? 'active' : '' ?>">
+            <span class="nav-icon-wrap"><i class="bi bi-house-door-fill"></i></span>
+            Home
+        </a>
+        <a href="<?= site_url('/shop') ?>" class="<?= strpos(current_url(), '/shop') !== false && strpos(current_url(), '/shop/') === false ? 'active' : '' ?>">
+            <span class="nav-icon-wrap"><i class="bi bi-grid-fill"></i></span>
+            Shop
+        </a>
+        <a href="<?= site_url('/cart') ?>" class="<?= strpos(current_url(), '/cart') !== false ? 'active' : '' ?>">
+            <span class="nav-icon-wrap">
+                <i class="bi bi-bag-fill"></i>
+                <span class="nav-badge" id="mobileCartCount"><?= getCartCount() ?></span>
+            </span>
+            Cart
+        </a>
+        <?php if (auth()->loggedIn()): ?>
+        <a href="<?= site_url('/orders') ?>" class="<?= strpos(current_url(), '/orders') !== false ? 'active' : '' ?>">
+            <span class="nav-icon-wrap"><i class="bi bi-box-seam-fill"></i></span>
+            Orders
+        </a>
+        <a href="<?= site_url('/downloads') ?>" class="<?= strpos(current_url(), '/downloads') !== false ? 'active' : '' ?>">
+            <span class="nav-icon-wrap"><i class="bi bi-download"></i></span>
+            Downloads
+        </a>
+        <?php else: ?>
+        <a href="<?= site_url('/login') ?>">
+            <span class="nav-icon-wrap"><i class="bi bi-person-fill"></i></span>
+            Login
+        </a>
+        <?php endif; ?>
+    </nav>
+
+    <script>
+    // Sync mobile cart badge with desktop
+    $(function() {
+        var count = $('#cartCount').text();
+        $('#mobileCartCount').text(count);
+    });
     </script>
 </body>
 </html>

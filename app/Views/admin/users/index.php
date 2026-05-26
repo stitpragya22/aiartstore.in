@@ -29,6 +29,7 @@
                             <ul class="dropdown-menu dropdown-menu-dark" style="background: var(--bg-card); border-color: var(--border-color);">
                                 <li>
                                     <form action="<?= site_url('/admin/users/toggle-group/' . $user->id) ?>" method="POST" class="px-3 py-2">
+                                        <?= csrf_field() ?>
                                         <small class="text-muted d-block mb-2">Toggle Groups:</small>
                                         <?php foreach (['user', 'admin', 'superadmin', 'beta'] as $group): ?>
                                             <div class="form-check mb-1">

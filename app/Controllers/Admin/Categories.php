@@ -25,12 +25,16 @@ class Categories extends BaseController
     {
         if ($this->request->is('post')) {
             $slug = url_title($this->request->getPost('name'), '-', true);
-            $this->categoryModel->save([
-                'name'        => $this->request->getPost('name'),
-                'slug'        => $slug,
-                'description' => $this->request->getPost('description'),
-                'status'      => $this->request->getPost('status') ?? 'active',
-            ]);
+            if (!$this->categoryModel->save([
+                'name'             => $this->request->getPost('name'),
+                'slug'             => $slug,
+                'description'      => $this->request->getPost('description'),
+                'meta_title'       => $this->request->getPost('meta_title'),
+                'meta_description' => $this->request->getPost('meta_description'),
+                'status'           => $this->request->getPost('status') ?? 'active',
+            ])) {
+                return redirect()->back()->with('errors', $this->categoryModel->errors())->withInput();
+            }
             return redirect()->to('/admin/categories')->with('message', 'Category created successfully');
         }
 
@@ -46,12 +50,16 @@ class Categories extends BaseController
         }
 
         if ($this->request->is('post')) {
-            $this->categoryModel->update($id, [
-                'name'        => $this->request->getPost('name'),
-                'slug'        => url_title($this->request->getPost('name'), '-', true),
-                'description' => $this->request->getPost('description'),
-                'status'      => $this->request->getPost('status') ?? 'active',
-            ]);
+            if (!$this->categoryModel->update($id, [
+                'name'             => $this->request->getPost('name'),
+                'slug'             => url_title($this->request->getPost('name'), '-', true),
+                'description'      => $this->request->getPost('description'),
+                'meta_title'       => $this->request->getPost('meta_title'),
+                'meta_description' => $this->request->getPost('meta_description'),
+                'status'           => $this->request->getPost('status') ?? 'active',
+            ])) {
+                return redirect()->back()->with('errors', $this->categoryModel->errors())->withInput();
+            }
             return redirect()->to('/admin/categories')->with('message', 'Category updated successfully');
         }
 
@@ -62,6 +70,10 @@ class Categories extends BaseController
 
     public function delete($id = null)
     {
+        if (!$this->request->is('post')) {
+            return redirect()->to('/admin/categories')->with('error', 'Invalid request');
+        }
+
         $this->categoryModel->delete($id);
         return redirect()->to('/admin/categories')->with('message', 'Category deleted successfully');
     }

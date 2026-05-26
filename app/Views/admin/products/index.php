@@ -23,7 +23,7 @@
                         <?php endif; ?>
                     </td>
                     <td><strong><?= esc($p['title']) ?></strong></td>
-                    <td class="text-muted"><?= esc($p['category_name'] ?? 'Uncategorized') ?></td>
+                    <td style="color:var(--text-secondary);font-weight:500;"><?= esc($p['category_name'] ?? 'Uncategorized') ?></td>
                     <td class="price-tag"><?= formatPrice($p['price']) ?></td>
                     <td><?= $p['is_featured'] ? '<span class="badge-status completed">Yes</span>' : '<span class="text-muted">No</span>' ?></td>
                     <td><span class="badge-status <?= $p['status'] ?>"><?= ucfirst($p['status']) ?></span></td>
@@ -31,7 +31,10 @@
                         <div class="d-flex gap-1">
                             <a href="<?= site_url('/shop/' . $p['slug']) ?>" class="btn btn-sm btn-outline-custom" target="_blank"><i class="bi bi-eye"></i></a>
                             <a href="<?= site_url('/admin/products/edit/' . $p['id']) ?>" class="btn btn-sm btn-outline-custom"><i class="bi bi-pencil"></i></a>
-                            <a href="<?= site_url('/admin/products/delete/' . $p['id']) ?>" class="btn btn-sm btn-outline-custom" onclick="return confirm('Delete this product?')" style="border-color: rgba(239,68,68,0.3); color: var(--danger);"><i class="bi bi-trash"></i></a>
+                            <form action="<?= site_url('/admin/products/delete/' . $p['id']) ?>" method="POST" onsubmit="return confirm('Delete this product?')">
+                                <?= csrf_field() ?>
+                                <button type="submit" class="btn btn-sm btn-outline-custom" style="border-color: rgba(239,68,68,0.3); color: var(--danger);"><i class="bi bi-trash"></i></button>
+                            </form>
                         </div>
                     </td>
                 </tr>

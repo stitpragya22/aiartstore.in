@@ -1,12 +1,19 @@
 # Environment
 .env
+.env.*
 
 # Dependencies
 vendor/
+composer.lock
 
 # Uploaded files
-uploads/products/*
-!uploads/products/.gitkeep
+public/uploads/products/*
+!public/uploads/products/.gitkeep
+writable/uploads/products/*
+!writable/uploads/products/.gitkeep
+
+# Debug toolbar - runtime debug data should never be committed
+writable/debugbar/*.json
 
 # OS
 Thumbs.db
@@ -36,10 +43,8 @@ writable/temp/*
 writable/testing/*
 !writable/testing/.gitkeep
 
-# Debug
+# Build artifacts
 build/
 *.sql
-
-# Deployment
 /extract.php
 /aiartstore.zip

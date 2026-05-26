@@ -26,15 +26,30 @@
                             </div>
                         </div>
                         <div class="d-flex gap-2">
-                            <a href="<?= site_url('/download/file/' . $dl['product_id'] . '/' . $dl['order_id']) ?>" class="btn btn-primary-custom flex-grow-1">
+                            <?php if ($dl['is_available']): ?>
+                            <a href="<?= site_url('/download/file/' . $dl['download_token']) ?>" class="btn btn-primary-custom flex-grow-1">
                                 <i class="bi bi-download me-1"></i>Download
                             </a>
+                            <?php else: ?>
+                            <span class="btn btn-secondary flex-grow-1 disabled">
+                                <i class="bi bi-x-circle me-1"></i>Access Expired
+                            </span>
+                            <?php endif; ?>
                         </div>
+                        <?php if (!empty($dl['expires_at'])): ?>
+                        <small class="text-muted mt-2 d-block">Access expires: <?= date('d M Y', strtotime($dl['expires_at'])) ?></small>
+                        <?php endif; ?>
+                        <?php if ((int)($dl['max_downloads'] ?? 0) > 0): ?>
+                        <small class="text-muted d-block">Downloads left: <?= max(0, (int)$dl['max_downloads'] - (int)$dl['download_count']) ?></small>
+                        <?php endif; ?>
                         <?php if ($dl['file_size']): ?>
                         <small class="text-muted mt-2 d-block">File size: <?= esc($dl['file_size']) ?></small>
                         <?php endif; ?>
                         <?php if ($dl['dimensions']): ?>
                         <small class="text-muted d-block">Dimensions: <?= esc($dl['dimensions']) ?></small>
+                        <?php endif; ?>
+                        <?php if (!$dl['is_available']): ?>
+                        <small class="text-danger mt-1 d-block"><i class="bi bi-exclamation-triangle me-1"></i>This download link has expired or is no longer available. <a href="<?= site_url('/contact') ?>">Contact support</a> for assistance.</small>
                         <?php endif; ?>
                     </div>
                 </div>
