@@ -119,11 +119,19 @@
 <script>
 var grandTotal = <?= $grand_total ?>;
 
+// Refresh CSRF token from cookie after each AJAX call (token regenerates on POST)
+$(document).ajaxComplete(function() {
+    var match = document.cookie.match(/(?:^|;\s*)csrf_cookie_name=([^;]+)/);
+    if (match) {
+        $('meta[name="csrf-token"]').attr('content', decodeURIComponent(match[1]));
+    }
+});
+
 $('#payBtn').click(function() {
     var btn = $(this);
     btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Processing...');
 
-    $.post('<?= site_url('/checkout/createOrder') ?>', function(res) {
+    $.post('<?= site_url('/checkout/createOrder') ?>', { '<?= csrf_token() ?>': $('meta[name="csrf-token"]').attr('content') }, function(res) {
         if (res.status === 'error') {
             alert(res.message);
             btn.prop('disabled', false).html('<i class="bi bi-credit-card me-2"></i>Pay ' + formatPrice(grandTotal));
