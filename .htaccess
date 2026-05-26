@@ -21,8 +21,8 @@ ServerSignature Off
 	Options +FollowSymlinks
 	RewriteEngine On
 
-	# RewriteBase: change to /subfolder/ if installed in a subfolder
-	RewriteBase /aiartstore.in/
+	# RewriteBase: set to / for production, /subfolder/ for local
+	# RewriteBase /
 
 	# ==================================================================
 	# BLOCK SENSITIVE PATHS
