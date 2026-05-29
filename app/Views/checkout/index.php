@@ -76,7 +76,7 @@
                         <div id="couponMessage" class="mt-2 small"></div>
                     </div>
 
-                    <div class="stat-card mt-3 d-none d-md-flex">
+                    <div class="stat-card mt-3 d-none d-md-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center gap-2">
                             <i class="bi bi-shield-check fs-4" style="color: var(--success);"></i>
                             <div>
@@ -84,6 +84,7 @@
                                 <p class="mb-0 small" style="color: #a0a0b8;">Your payment is processed securely via Razorpay</p>
                             </div>
                         </div>
+                        <img src="<?= base_url('razorpay.png') ?>" alt="Razorpay Secure" style="height: 28px; object-fit: contain; flex-shrink: 0;" class="ms-3">
                     </div>
                 </div>
 
@@ -103,10 +104,13 @@
                         </div>
                         <a href="<?= site_url('/cart') ?>" class="btn btn-outline-custom w-100 mt-2 d-none d-md-block">Back to Cart</a>
 
-                        <div class="d-flex justify-content-center gap-3 mt-3 text-muted fs-3">
-                            <i class="bi bi-credit-card"></i>
-                            <i class="bi bi-paypal"></i>
-                            <i class="bi bi-google"></i>
+                        <div class="d-flex flex-column align-items-center gap-2 mt-3">
+                            <img src="<?= base_url('razorpay.png') ?>" alt="Razorpay Payments" style="height: 24px; object-fit: contain; opacity: 0.85;">
+                            <div class="d-flex justify-content-center gap-3 text-muted fs-4">
+                                <i class="bi bi-credit-card"></i>
+                                <i class="bi bi-paypal"></i>
+                                <i class="bi bi-google"></i>
+                            </div>
                         </div>
                     </div>
                 </div>

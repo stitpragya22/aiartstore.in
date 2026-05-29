@@ -31,11 +31,14 @@
                 </div>
                 <div class="col-md-4">
                     <h6 class="fw-bold mb-3">Payment</h6>
-                    <p class="text-muted small">Secure payments via Razorpay</p>
-                    <div class="d-flex gap-2 fs-3 text-muted">
-                        <i class="bi bi-credit-card"></i>
-                        <i class="bi bi-paypal"></i>
-                        <i class="bi bi-google"></i>
+                    <p class="text-muted small mb-2">Secure payments via Razorpay</p>
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="<?= base_url('razorpay.png') ?>" alt="Razorpay" style="height: 22px; object-fit: contain; opacity: 0.8;">
+                        <div class="d-flex gap-2 fs-4 text-muted">
+                            <i class="bi bi-credit-card"></i>
+                            <i class="bi bi-paypal"></i>
+                            <i class="bi bi-google"></i>
+                        </div>
                     </div>
                 </div>
             </div>
