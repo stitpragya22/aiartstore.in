@@ -108,5 +108,8 @@
         $('#mobileCartCount').text(count);
     });
     </script>
+
+    <!-- Dynamic Footer Code (e.g. Analytics, JS, etc.) -->
+    <?= get_custom_setting('custom_js') ?>
 </body>
 </html>

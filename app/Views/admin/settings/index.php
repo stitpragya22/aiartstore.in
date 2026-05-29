@@ -62,6 +62,21 @@
             </select>
         </div>
 
+        <hr class="my-4" style="border-color: var(--border-color);">
+        
+        <h5 class="fw-bold mb-3"><i class="bi bi-code-slash me-2" style="color: var(--accent-primary);"></i>Custom Header & Footer Code</h5>
+        <p class="text-muted mb-4">Add custom CSS styles to the website header and custom Javascript code to the footer (e.g. tracking pixels, analytics, or custom styling overrides).</p>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Custom Header Code (Loaded in &lt;head&gt;)</label>
+            <textarea name="custom_css" class="form-control" rows="6" style="font-family: monospace;" placeholder="<!-- Paste your Google Analytics, custom CSS (inside <style>), or meta tags here -->"><?= esc($settings['custom_css'] ?? '') ?></textarea>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label fw-semibold">Custom Footer Code (Loaded before &lt;/body&gt;)</label>
+            <textarea name="custom_js" class="form-control" rows="6" style="font-family: monospace;" placeholder="<!-- Paste your tracking pixels, footer scripts, or custom Javascript (inside <script>) here -->"><?= esc($settings['custom_js'] ?? '') ?></textarea>
+        </div>
+
         <button type="submit" class="btn btn-primary-custom"><i class="bi bi-check-lg me-1"></i>Save Settings</button>
         <a href="<?= site_url('/admin') ?>" class="btn btn-outline-custom">Cancel</a>
     </form>

@@ -19,11 +19,15 @@ class Settings extends BaseController
                 'razorpay_live_key_secret'  => $this->request->getPost('razorpay_live_key_secret'),
                 'razorpay_webhook_secret'   => $this->request->getPost('razorpay_webhook_secret'),
                 'razorpay_currency'         => $this->request->getPost('razorpay_currency'),
+                'custom_css'                => $this->request->getPost('custom_css'),
+                'custom_js'                 => $this->request->getPost('custom_js'),
             ];
 
             foreach ($settings as $key => $value) {
+                $class = (in_array($key, ['custom_css', 'custom_js'])) ? 'App\Views\Layouts' : 'App\Libraries\Razorpay';
+
                 $existing = $db->table('settings')
-                    ->where('class', 'App\Libraries\Razorpay')
+                    ->where('class', $class)
                     ->where('key', $key)
                     ->get()
                     ->getRow();
@@ -34,7 +38,7 @@ class Settings extends BaseController
                         ->update(['value' => $value, 'updated_at' => date('Y-m-d H:i:s')]);
                 } else {
                     $db->table('settings')->insert([
-                        'class'      => 'App\Libraries\Razorpay',
+                        'class'      => $class,
                         'key'        => $key,
                         'value'      => $value,
                         'type'       => 'string',
@@ -48,7 +52,7 @@ class Settings extends BaseController
         }
 
         $rows = $db->table('settings')
-            ->where('class', 'App\Libraries\Razorpay')
+            ->whereIn('class', ['App\Libraries\Razorpay', 'App\Views\Layouts'])
             ->get()
             ->getResultArray();
 

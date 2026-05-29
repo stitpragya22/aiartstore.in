@@ -11,5 +11,21 @@
  * loaded early on, and may also contain additional functions
  * that you'd like to use throughout your entire application
  *
- * @see: https://codeigniter.com/user_guide/extending/common.html
  */
+
+if (! function_exists('get_custom_setting')) {
+    function get_custom_setting(string $key, string $default = ''): string
+    {
+        try {
+            $db = db_connect();
+            $row = $db->table('settings')
+                ->where('class', 'App\Views\Layouts')
+                ->where('key', $key)
+                ->get()
+                ->getRowArray();
+            return $row['value'] ?? $default;
+        } catch (\Exception $e) {
+            return $default;
+        }
+    }
+}

@@ -1,15 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BY67JPBVPG"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-BY67JPBVPG');
-    </script>
+    <!-- Dynamic Header Code (e.g. Analytics, CSS, etc.) -->
+    <?= get_custom_setting('custom_css') ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | AI Art Store</title>
@@ -242,5 +235,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Dynamic Footer Code (e.g. Analytics, JS, etc.) -->
+    <?= get_custom_setting('custom_js') ?>
 </body>
 </html>
