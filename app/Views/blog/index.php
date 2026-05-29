@@ -5,9 +5,9 @@
         <div class="col-lg-8">
             <h1 class="display-6 fw-bold"><?= $current_category ? esc($current_category['name']) : 'Blog' ?></h1>
             <?php if ($current_category && $current_category['description']): ?>
-                <p class="text-muted lead"><?= esc($current_category['description']) ?></p>
+                <p class="section-subtitle lead"><?= esc($current_category['description']) ?></p>
             <?php else: ?>
-                <p class="text-muted">Insights, guides, and stories from the world of AI art and digital creativity.</p>
+                <p class="section-subtitle">Insights, guides, and stories from the world of AI art and digital creativity.</p>
             <?php endif ?>
         </div>
     </div>
