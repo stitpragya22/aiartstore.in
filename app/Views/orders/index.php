@@ -28,7 +28,7 @@
                         <?php foreach ($orders as $order): ?>
                         <tr>
                             <td><strong class="text-white"><?= esc($order['order_number']) ?></strong></td>
-                            <td class="text-muted"><?= date('d M Y, h:i A', strtotime($order['created_at'])) ?></td>
+                            <td class="text-white"><?= date('d M Y, h:i A', strtotime($order['created_at'])) ?></td>
                             <td class="price-tag"><?= formatPrice($order['total']) ?></td>
                             <td>
                                 <span class="badge-status <?= $order['payment_status'] === 'completed' ? 'completed' : 'pending' ?>">
