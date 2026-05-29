@@ -19,6 +19,7 @@ $img = null;
 if ($product['image_watermarked'] || $product['image']) {
     $img = base_url('uploads/products/' . ($product['image_watermarked'] ?? $product['image']));
 }
+
 ?>
 <?= view('layouts/header') ?>
 <script type="application/ld+json">
@@ -138,7 +139,7 @@ if ($product['image_watermarked'] || $product['image']) {
 }
 .feature-icon-box i { font-size: 1.8rem; }
 .feature-icon-box h6 { margin-top: 0.75rem; font-weight: 700; }
-.feature-icon-box p { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0; }
+.feature-icon-box p { font-size: 0.8rem; color: var(--text-white); margin-bottom: 0; }
 .price-hero {
     font-size: 2.8rem;
     font-weight: 800;
@@ -150,7 +151,7 @@ if ($product['image_watermarked'] || $product['image']) {
 }
 .old-price-hero {
     font-size: 1.4rem;
-    color: var(--text-muted);
+    color: var(--text-white);
     text-decoration: line-through;
     font-weight: 500;
 }
@@ -206,10 +207,10 @@ if ($product['image_watermarked'] || $product['image']) {
     <div class="container">
         <nav aria-label="breadcrumb" class="mb-3">
             <ol class="breadcrumb" style="background:transparent;">
-                <li class="breadcrumb-item"><a href="<?= site_url('/') ?>" class="text-decoration-none" style="color:var(--text-muted)">Home</a></li>
-                <li class="breadcrumb-item"><a href="<?= site_url('/shop') ?>" class="text-decoration-none" style="color:var(--text-muted)">Shop</a></li>
+                <li class="breadcrumb-item"><a href="<?= site_url('/') ?>" class="text-decoration-none" style="color:var(--text-white)">Home</a></li>
+                <li class="breadcrumb-item"><a href="<?= site_url('/shop') ?>" class="text-decoration-none" style="color:var(--text-white)">Shop</a></li>
                 <?php if (isset($product['category_name'])): ?>
-                <li class="breadcrumb-item"><a href="<?= site_url('/shop/category/' . $product['category_slug']) ?>" class="text-decoration-none" style="color:var(--text-muted)"><?= esc($product['category_name']) ?></a></li>
+                <li class="breadcrumb-item"><a href="<?= site_url('/shop/category/' . $product['category_slug']) ?>" class="text-decoration-none" style="color:var(--text-white)"><?= esc($product['category_name']) ?></a></li>
                 <?php endif; ?>
                 <li class="breadcrumb-item active text-white"><?= esc($product['title']) ?></li>
             </ol>
@@ -284,11 +285,12 @@ if ($product['image_watermarked'] || $product['image']) {
                 <?php if (!empty($details)): ?>
                 <?php
                 $detailLabels = [
-                    'author' => 'Author', 'pages' => 'Pages', 'language' => 'Language',
-                    'isbn' => 'ISBN', 'duration' => 'Duration', 'narrator' => 'Narrator',
-                    'bitrate' => 'Bitrate', 'bundle_items' => 'Includes',
+                    'ebook' => ['author' => 'Author', 'pages' => 'Pages', 'language' => 'Language', 'isbn' => 'ISBN'],
+                    'audio' => ['duration' => 'Duration', 'narrator' => 'Narrator', 'bitrate' => 'Bitrate'],
                 ];
-                $printDetails = array_filter($details, fn($k) => $k !== 'bundle_items', ARRAY_FILTER_USE_KEY);
+                $allowedDetailLabels = $detailLabels[$type] ?? [];
+                $printDetails = array_intersect_key($details, $allowedDetailLabels);
+                $printDetails = array_filter($printDetails, static fn($val) => trim((string) $val) !== '');
                 ?>
                 <?php if (!empty($printDetails)): ?>
                 <div class="glass-card p-4 mb-4 fade-in-up">
@@ -298,7 +300,7 @@ if ($product['image_watermarked'] || $product['image']) {
                     <div style="border-radius:12px;overflow:hidden;background:rgba(0,0,0,0.2);">
                         <?php $di = 0; foreach ($printDetails as $key => $val): ?>
                         <div class="spec-row" style="<?= $di % 2 === 0 ? 'background:rgba(255,255,255,0.02)' : '' ?>">
-                            <span class="spec-label"><?= $detailLabels[$key] ?? ucfirst($key) ?></span>
+                            <span class="spec-label"><?= $allowedDetailLabels[$key] ?? ucfirst($key) ?></span>
                             <span class="spec-value"><?= esc($val) ?></span>
                         </div>
                         <?php $di++; endforeach; ?>
@@ -310,15 +312,21 @@ if ($product['image_watermarked'] || $product['image']) {
                 <?php if ($product['content']): ?>
                 <div class="glass-card p-4 p-md-5 mb-4 fade-in-up content-body">
                     <?php
-                    $cleanContent = strip_tags($product['content'], '<h2><h3><h4><p><br><strong><em><b><i><u><a><ul><ol><li><blockquote><pre><code><img><table><thead><tbody><tr><th><td><hr><span><div><figure><figcaption><section>');
-                    $cleanContent = preg_replace('/\s+on\w+\s*=\s*(?:"[^"]*"|\'[^\']*\')/i', '', $cleanContent);
-                    $cleanContent = preg_replace('/href\s*=\s*(?:"javascript:[^"]*"|\'javascript:[^\']*\')/i', 'href="#"', $cleanContent);
-                    echo $cleanContent;
+                    $productContent = $product['content'];
+                    // var_dump($productContent);
+                    for ($i = 0; $i < 10; $i++) {
+                        $decodedContent = html_entity_decode($productContent, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                        if ($decodedContent === $productContent) {
+                            break;
+                        }
+                        $productContent = $decodedContent;
+                    }
+                    echo $productContent;
                     ?>
                 </div>
                 <?php endif; ?>
 
-                <?php if (!empty($details['bundle_items'])): ?>
+                <?php if (1==0 && $type === 'bundle' && !empty($details['bundle_items'])): ?>
                 <div class="glass-card p-4 p-md-5 mb-4 fade-in-up">
                     <h4 class="fw-bold mb-4" style="font-family:'Space Grotesk',sans-serif;">
                         <i class="bi bi-box-seam me-2" style="color:<?= $tColor ?>"></i>What's Included
@@ -341,7 +349,7 @@ if ($product['image_watermarked'] || $product['image']) {
 
                         <div class="mt-3 d-flex align-items-center gap-2">
                             <span class="pulse-dot" style="background:var(--success);"></span>
-                            <small style="color:var(--text-muted);font-weight:500;">In stock & ready to download</small>
+                            <small style="color:var(--text-white);font-weight:500;">In stock & ready to download</small>
                         </div>
 
                         <?php if (isProductPurchased($product['id'])): ?>
@@ -351,14 +359,14 @@ if ($product['image_watermarked'] || $product['image']) {
                                     <i class="bi bi-<?= $dlAvailRich ? 'check-circle-fill' : 'x-circle-fill' ?>" style="color:<?= $dlAvailRich ? 'var(--success)' : 'var(--danger)' ?>;font-size:1.2rem;"></i>
                                     <strong style="color:<?= $dlAvailRich ? 'var(--success)' : 'var(--danger)' ?>;font-size:1.1rem;"><?= $dlAvailRich ? 'Purchased' : 'Access Expired' ?></strong>
                                 </div>
-                                <small style="color:var(--text-muted);">Purchased on <?= date('d M Y', strtotime(getPurchaseDate($product['id']))) ?></small>
+                                <small style="color:var(--text-white);">Purchased on <?= date('d M Y', strtotime(getPurchaseDate($product['id']))) ?></small>
                                 <div class="mt-3">
                                     <?php if ($dlAvailRich): ?>
                                     <a href="<?= getPurchaseDownloadUrl($product['id']) ?>" class="btn w-100 py-2" style="background:var(--success);color:#fff;border-radius:12px;font-weight:600;">
                                         <i class="bi bi-download me-2"></i>Download Now
                                     </a>
                                     <?php else: ?>
-                                    <span class="btn w-100 py-2 disabled" style="background:var(--text-muted);color:#fff;border-radius:12px;font-weight:600;opacity:0.6;">
+                                    <span class="btn w-100 py-2 disabled" style="background:var(--text-white);color:#fff;border-radius:12px;font-weight:600;opacity:0.6;">
                                         <i class="bi bi-x-circle me-2"></i>Download Expired
                                     </span>
                                     <small style="color:var(--danger);" class="mt-2 d-block text-center"><i class="bi bi-exclamation-triangle me-1"></i>This download has expired. <a href="<?= site_url('/contact') ?>">Contact support</a>.</small>
@@ -381,17 +389,17 @@ if ($product['image_watermarked'] || $product['image']) {
 
                         <div class="d-flex align-items-center justify-content-center gap-2 mt-3">
                             <i class="bi bi-shield-check" style="color:var(--success);"></i>
-                            <small style="color:var(--text-muted);">Secure checkout via Razorpay</small>
+                            <small style="color:var(--text-white);">Secure checkout via Razorpay</small>
                         </div>
                         <div class="d-flex align-items-center justify-content-center gap-2 mt-1">
                             <i class="bi bi-lightning-charge" style="color:<?= $tColor ?>;"></i>
-                            <small style="color:var(--text-muted);">Instant download after purchase</small>
+                            <small style="color:var(--text-white);">Instant download after purchase</small>
                         </div>
                         <?php endif; ?>
                     </div>
 
                     <div class="glass-card p-4 fade-in-up">
-                        <h6 class="fw-bold mb-3" style="font-size:0.9rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Why Shop Here</h6>
+                        <h6 class="fw-bold mb-3" style="font-size:0.9rem;color:var(--text-white);text-transform:uppercase;letter-spacing:0.05em;">Why Shop Here</h6>
                         <div class="d-flex flex-column gap-3">
                             <div class="d-flex align-items-center gap-3">
                                 <div style="width:38px;height:38px;border-radius:10px;background:<?= $tColor ?>18;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -399,7 +407,7 @@ if ($product['image_watermarked'] || $product['image']) {
                                 </div>
                                 <div>
                                     <small class="fw-semibold d-block" style="color:rgba(255,255,255,0.9);">Instant Delivery</small>
-                                    <small style="color:var(--text-muted);">Download immediately</small>
+                                    <small style="color:var(--text-white);">Download immediately</small>
                                 </div>
                             </div>
                             <div class="d-flex align-items-center gap-3">
@@ -408,7 +416,7 @@ if ($product['image_watermarked'] || $product['image']) {
                                 </div>
                                 <div>
                                     <small class="fw-semibold d-block" style="color:rgba(255,255,255,0.9);">Lifetime Access</small>
-                                    <small style="color:var(--text-muted);">Re-download anytime</small>
+                                    <small style="color:var(--text-white);">Re-download anytime</small>
                                 </div>
                             </div>
                             <div class="d-flex align-items-center gap-3">
@@ -417,7 +425,7 @@ if ($product['image_watermarked'] || $product['image']) {
                                 </div>
                                 <div>
                                     <small class="fw-semibold d-block" style="color:rgba(255,255,255,0.9);">Secure Checkout</small>
-                                    <small style="color:var(--text-muted);">Razorpay protected</small>
+                                    <small style="color:var(--text-white);">Razorpay protected</small>
                                 </div>
                             </div>
                         </div>
@@ -435,7 +443,7 @@ if ($product['image_watermarked'] || $product['image']) {
         <div class="flex-shrink-0">
             <div class="fw-bold fs-5" style="color:<?= $tColor ?>;"><?= formatPrice($product['price']) ?></div>
             <?php if (!empty($product['compare_price']) && $product['compare_price'] > $product['price']): ?>
-            <small style="color:var(--text-muted);text-decoration:line-through;"><?= formatPrice($product['compare_price']) ?></small>
+            <small style="color:var(--text-white);text-decoration:line-through;"><?= formatPrice($product['compare_price']) ?></small>
             <?php endif; ?>
         </div>
         <div class="flex-grow-1 d-flex gap-2">
@@ -503,7 +511,7 @@ function addToCartMobile(id) {
         <h2 class="section-title mb-4">Customer Reviews</h2>
 
         <?php if (empty($reviews) && !$can_review): ?>
-            <p class="text-muted">No reviews yet.</p>
+            <p class="text-white">No reviews yet.</p>
         <?php endif; ?>
 
         <?php if ($can_review && !$has_reviewed): ?>
@@ -532,7 +540,7 @@ function addToCartMobile(id) {
             </form>
         </div>
         <?php elseif ($has_reviewed): ?>
-            <p class="text-muted mb-4">You have already reviewed this product.</p>
+            <p class="text-white mb-4">You have already reviewed this product.</p>
         <?php endif; ?>
 
         <?php if (!empty($reviews)): ?>
@@ -545,7 +553,7 @@ function addToCartMobile(id) {
                         <i class="bi bi-star<?= $i <= round($avg_rating) ? '-fill' : '' ?>" style="color: #f59e0b;"></i>
                         <?php endfor; ?>
                     </div>
-                    <small class="text-muted"><?= count($reviews) ?> review<?= count($reviews) !== 1 ? 's' : '' ?></small>
+                    <small class="text-white"><?= count($reviews) ?> review<?= count($reviews) !== 1 ? 's' : '' ?></small>
                 </div>
             </div>
             <div class="col-md-8">
@@ -560,13 +568,13 @@ function addToCartMobile(id) {
                                 <?php endfor; ?>
                             </div>
                         </div>
-                        <small class="text-muted"><?= date('d M Y', strtotime($review['created_at'])) ?></small>
+                        <small class="text-white"><?= date('d M Y', strtotime($review['created_at'])) ?></small>
                     </div>
                     <?php if ($review['title']): ?>
                     <h6 class="fw-semibold mb-1"><?= esc($review['title']) ?></h6>
                     <?php endif; ?>
                     <?php if ($review['review']): ?>
-                    <p class="mb-0 small text-muted"><?= nl2br(esc($review['review'])) ?></p>
+                    <p class="mb-0 small text-white"><?= nl2br(esc($review['review'])) ?></p>
                     <?php endif; ?>
                 </div>
                 <?php endforeach; ?>

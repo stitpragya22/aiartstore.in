@@ -39,7 +39,7 @@
             <div class="row g-4">
                 <div class="col-lg-7">
                     <div class="stat-card p-0 p-md-4" style="background:transparent;border:none;">
-                        <h5 class="fw-bold mb-3 px-3 px-md-0">Order Summary</h5>
+                        <h5 class="fw-bold mb-3 px-3 px-md-0">Order Summary ...</h5>
                         <?php foreach ($cart as $item): ?>
                         <div class="checkout-item d-flex align-items-center gap-3">
                             <?php if ($item['image']): ?>
@@ -119,19 +119,19 @@
 <script>
 var grandTotal = <?= $grand_total ?>;
 
-// Refresh CSRF token from cookie after each AJAX call (token regenerates on POST)
-$(document).ajaxComplete(function() {
-    var match = document.cookie.match(/(?:^|;\s*)csrf_cookie_name=([^;]+)/);
-    if (match) {
-        $('meta[name="csrf-token"]').attr('content', decodeURIComponent(match[1]));
+function updateCsrfToken(res) {
+    if (res && res.csrfHash) {
+        $('meta[name="csrf-token"]').attr('content', res.csrfHash);
     }
-});
+}
 
 $('#payBtn').click(function() {
     var btn = $(this);
     btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Processing...');
 
     $.post('<?= site_url('/checkout/createOrder') ?>', { '<?= csrf_token() ?>': $('meta[name="csrf-token"]').attr('content') }, function(res) {
+        updateCsrfToken(res);
+
         if (res.status === 'error') {
             alert(res.message);
             btn.prop('disabled', false).html('<i class="bi bi-credit-card me-2"></i>Pay ' + formatPrice(grandTotal));
@@ -152,7 +152,7 @@ $('#payBtn').click(function() {
             theme: { color: '#8b5cf6' },
             handler: function(response) {
                 $('<form>').attr({ method: 'POST', action: '<?= site_url('/checkout/verify') ?>' })
-                    .append($('<input>').attr({ name: '<?= csrf_token() ?>', value: $('meta[name="csrf-token"]').attr('content') }))
+                    .append($('<input>').attr({ name: res.csrfToken || '<?= csrf_token() ?>', value: $('meta[name="csrf-token"]').attr('content') }))
                     .append($('<input>').attr({ name: 'razorpay_order_id', value: response.razorpay_order_id }))
                     .append($('<input>').attr({ name: 'razorpay_payment_id', value: response.razorpay_payment_id }))
                     .append($('<input>').attr({ name: 'razorpay_signature', value: response.razorpay_signature }))
@@ -182,13 +182,15 @@ $('#applyCouponBtn').click(function() {
         code: code,
         '<?= csrf_token() ?>': $('meta[name="csrf-token"]').attr('content')
     }, function(res) {
+        updateCsrfToken(res);
+
         if (res.valid) {
             $('#couponMessage').html('<span class="text-success">' + res.message + '</span>');
-            $('#discountDisplay').text('-₹' + res.discount.toFixed(2));
-            $('#grandTotalDisplayMobile').text('₹' + res.grand_total.toFixed(2));
-            $('#payAmount').text('₹' + res.grand_total.toFixed(2));
+            $('#discountDisplay').text('-' + res.formatted_discount);
+            $('#grandTotalDisplayMobile').text(res.formatted_grand_total);
+            $('#payAmount').text(res.formatted_grand_total);
             grandTotal = res.grand_total;
-            $('#subtotalDisplay').text('₹' + (grandTotal + (res.discount || 0)).toFixed(2));
+            $('#subtotalDisplay').text(res.formatted_total);
         } else {
             $('#couponMessage').html('<span class="text-danger">' + res.message + '</span>');
         }
@@ -202,6 +204,7 @@ $('#removeCouponBtn').click(function() {
         code: '',
         '<?= csrf_token() ?>': $('meta[name="csrf-token"]').attr('content')
     }, function(res) {
+        updateCsrfToken(res);
         location.reload();
     }).fail(function() {
         $('#couponMessage').html('<span class="text-danger">Failed to remove coupon. Try again.</span>');

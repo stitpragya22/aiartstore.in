@@ -18,6 +18,26 @@ class Products extends BaseController
         $this->categoryModel = new CategoryModel();
     }
 
+    private function productDetailsJson(string $productType): ?string
+    {
+        $details = $this->request->getPost('details_json');
+        if (!is_array($details)) {
+            return $details ?: null;
+        }
+
+        $allowedByType = [
+            'ebook'  => ['author', 'pages', 'language', 'isbn'],
+            'audio'  => ['duration', 'narrator', 'bitrate'],
+            'bundle' => ['bundle_items'],
+        ];
+
+        $allowed = $allowedByType[$productType] ?? [];
+        $details = array_intersect_key($details, array_flip($allowed));
+        $details = array_filter($details, static fn($value) => trim((string) $value) !== '');
+
+        return $details ? json_encode($details) : null;
+    }
+
     public function index()
     {
         $data['products'] = $this->productModel->select('products.*, categories.name as category_name')
@@ -44,12 +64,12 @@ class Products extends BaseController
                     $slug .= '-' . uniqid();
                 }
 
-                $detailsRaw = $this->request->getPost('details_json');
-                $detailsJson = is_array($detailsRaw) ? json_encode($detailsRaw) : $detailsRaw;
+                $productType = $this->request->getPost('product_type') ?? 'art';
+                $detailsJson = $this->productDetailsJson($productType);
 
                 $data = [
                     'category_id'   => $this->request->getPost('category_id'),
-                    'product_type'  => $this->request->getPost('product_type') ?? 'art',
+                    'product_type'  => $productType,
                     'title'         => $this->request->getPost('title'),
                     'subtitle'      => $this->request->getPost('subtitle'),
                     'slug'          => $slug,
@@ -132,12 +152,12 @@ class Products extends BaseController
                 $slug .= '-' . uniqid();
             }
 
-            $detailsRaw = $this->request->getPost('details_json');
-            $detailsJson = is_array($detailsRaw) ? json_encode($detailsRaw) : $detailsRaw;
+            $productType = $this->request->getPost('product_type') ?? 'art';
+            $detailsJson = $this->productDetailsJson($productType);
 
             $data = [
                 'category_id'   => $this->request->getPost('category_id'),
-                'product_type'  => $this->request->getPost('product_type') ?? 'art',
+                'product_type'  => $productType,
                 'title'         => $this->request->getPost('title'),
                 'subtitle'      => $this->request->getPost('subtitle'),
                 'slug'          => $slug,

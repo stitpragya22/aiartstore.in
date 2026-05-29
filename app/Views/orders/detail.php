@@ -37,16 +37,16 @@
             <div class="col-lg-4">
                 <div class="stat-card">
                     <h5 class="fw-bold mb-3">Order Summary</h5>
-                    <div class="d-flex justify-content-between mb-2"><span class="text-muted">Subtotal</span><span><?= formatPrice($order['subtotal']) ?></span></div>
-                    <div class="d-flex justify-content-between mb-2"><span class="text-muted">Tax</span><span><?= formatPrice($order['tax']) ?></span></div>
-                    <div class="d-flex justify-content-between mb-2"><span class="text-muted">Discount</span><span><?= formatPrice($order['discount']) ?></span></div>
+                    <div class="d-flex justify-content-between mb-2"><span class="text-white">Subtotal</span><span><?= formatPrice($order['subtotal']) ?></span></div>
+                    <!-- <div class="d-flex justify-content-between mb-2"><span class="text-white">Tax</span><span><?= formatPrice($order['tax']) ?></span></div> -->
+                    <div class="d-flex justify-content-between mb-2"><span class="text-white">Discount</span><span><?= formatPrice($order['discount']) ?></span></div>
                     <hr style="border-color: var(--border-color);">
                     <div class="d-flex justify-content-between fs-5"><strong>Total</strong><span class="price-tag"><?= formatPrice($order['total']) ?></span></div>
                     <hr style="border-color: var(--border-color);">
-                    <div class="mb-2"><small class="text-muted">Payment</small><br><span class="badge-status <?= $order['payment_status'] === 'completed' ? 'completed' : 'pending' ?>"><?= ucfirst($order['payment_status']) ?></span></div>
-                    <div class="mb-2"><small class="text-muted">Order Status</small><br><span class="badge-status <?= $order['status'] ?>"><?= ucfirst($order['status']) ?></span></div>
+                    <div class="mb-2"><small class="text-white">Payment</small><br><span class="badge-status <?= $order['payment_status'] === 'completed' ? 'completed' : 'pending' ?>"><?= ucfirst($order['payment_status']) ?></span></div>
+                    <div class="mb-2"><small class="text-white">Order Status</small><br><span class="badge-status <?= $order['status'] ?>"><?= ucfirst($order['status']) ?></span></div>
                     <?php if ($order['invoice_no']): ?>
-                    <div class="mb-2"><small class="text-muted">Invoice</small><br>
+                    <div class="mb-2"><small class="text-white">Invoice</small><br>
                         <a href="<?= site_url('/download/invoice/' . $order['id']) ?>" class="text-decoration-none">
                             <strong><?= esc($order['invoice_no']) ?></strong>
                             <i class="bi bi-download ms-1" style="color: var(--accent-primary);"></i>

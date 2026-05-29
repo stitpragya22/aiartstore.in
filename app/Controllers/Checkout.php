@@ -13,6 +13,34 @@ use App\Libraries\Razorpay;
 
 class Checkout extends BaseController
 {
+    private ?array $orderFields = null;
+
+    private function checkoutJson(array $data)
+    {
+        return $this->response->setJSON($data + [
+            'csrfToken' => csrf_token(),
+            'csrfHash'  => csrf_hash(),
+        ]);
+    }
+
+    private function orderData(array $data): array
+    {
+        if ($this->orderFields === null) {
+            $this->orderFields = db_connect()->getFieldNames('orders');
+        }
+
+        return array_intersect_key($data, array_flip($this->orderFields));
+    }
+
+    private function orderHasField(string $field): bool
+    {
+        if ($this->orderFields === null) {
+            $this->orderFields = db_connect()->getFieldNames('orders');
+        }
+
+        return in_array($field, $this->orderFields, true);
+    }
+
     public function index()
     {
         if (!auth()->loggedIn()) {
@@ -40,7 +68,7 @@ class Checkout extends BaseController
         // Calculate totals
         $total = array_sum(array_map(function($i) { return $i['price'] * $i['quantity']; }, $cart));
         $couponCode = session()->get('coupon_code');
-        $couponDiscount = session()->get('coupon_discount', 0);
+        $couponDiscount = (float) (session()->get('coupon_discount') ?? 0);
         $data['cart'] = $cart;
         $data['total'] = $total;
         $data['coupon_code'] = $couponCode;
@@ -56,34 +84,34 @@ class Checkout extends BaseController
     public function createOrder()
     {
         if (!auth()->loggedIn()) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Please login']);
+            return $this->checkoutJson(['status' => 'error', 'message' => 'Please login']);
         }
 
         $cart = session()->get('cart') ?? [];
         if (empty($cart)) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Cart is empty']);
+            return $this->checkoutJson(['status' => 'error', 'message' => 'Cart is empty']);
         }
 
         $user = auth()->user();
 
         foreach ($cart as $item) {
             if (isProductPurchased($item['id'])) {
-                return $this->response->setJSON(['status' => 'error', 'message' => 'You already own: ' . esc($item['title'])]);
+                return $this->checkoutJson(['status' => 'error', 'message' => 'You already own: ' . esc($item['title'])]);
             }
         }
 
         $couponCode = session()->get('coupon_code');
-        $couponDiscount = session()->get('coupon_discount', 0);
+        $couponDiscount = (float) (session()->get('coupon_discount') ?? 0);
 
         $productModel = model(ProductModel::class);
         $total = 0;
         foreach ($cart as $id => &$item) {
             $product = $productModel->find($id);
             if (!$product || $product['status'] !== 'active') {
-                return $this->response->setJSON(['status' => 'error', 'message' => 'Product unavailable: ' . esc($item['title'])]);
+                return $this->checkoutJson(['status' => 'error', 'message' => 'Product unavailable: ' . esc($item['title'])]);
             }
             if (isProductPurchased($id)) {
-                return $this->response->setJSON(['status' => 'error', 'message' => 'You already own: ' . esc($item['title'])]);
+                return $this->checkoutJson(['status' => 'error', 'message' => 'You already own: ' . esc($item['title'])]);
             }
             $item['price'] = (float) $product['price'];
             $item['quantity'] = !empty($product['is_digital']) ? 1 : $item['quantity'];
@@ -93,7 +121,7 @@ class Checkout extends BaseController
 
         $finalTotal = max($total - $couponDiscount, 0);
         if ($finalTotal == 0) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Invalid total']);
+            return $this->checkoutJson(['status' => 'error', 'message' => 'Invalid total']);
         }
 
         $orderNumber = 'ORD-' . strtoupper(uniqid());
@@ -102,7 +130,7 @@ class Checkout extends BaseController
         $razorpay = new Razorpay();
 
         try {
-            $orderId = $orderModel->insert([
+            $orderId = $orderModel->insert($this->orderData([
                 'user_id'      => $user->id,
                 'order_number' => $orderNumber,
                 'subtotal'     => $total,
@@ -111,7 +139,7 @@ class Checkout extends BaseController
                 'coupon_code'  => $couponCode,
                 'status'       => 'pending',
                 'customer_email' => $user->email,
-            ]);
+            ]));
 
             foreach ($cart as $item) {
                 $orderItemModel->insert([
@@ -130,10 +158,12 @@ class Checkout extends BaseController
             if (isset($result['error'])) {
                 $orderModel->delete($orderId);
                 log_message('error', 'Razorpay createOrder failed: ' . json_encode($result['error']));
-                return $this->response->setJSON(['status' => 'error', 'message' => 'Payment gateway error. Please try again.']);
+                return $this->checkoutJson(['status' => 'error', 'message' => 'Payment gateway error. Please try again.']);
             }
 
-            $orderModel->update($orderId, ['gateway_order_id' => $result['id']]);
+            if ($this->orderHasField('gateway_order_id')) {
+                $orderModel->update($orderId, ['gateway_order_id' => $result['id']]);
+            }
 
             session()->remove('razorpay_order_id');
             session()->remove('pending_order_id');
@@ -142,7 +172,7 @@ class Checkout extends BaseController
             session()->set('pending_order_id', $orderId);
             session()->set('pending_order_total', $finalTotal);
 
-            return $this->response->setJSON([
+            return $this->checkoutJson([
                 'status'   => 'success',
                 'orderId'  => $result['id'],
                 'amount'   => $finalTotal * 100,
@@ -151,10 +181,10 @@ class Checkout extends BaseController
                 'name'     => $user->username ?? $user->email,
                 'email'    => $user->email,
             ]);
-        } catch (\Exception $e) {
-            log_message('error', 'Checkout createOrder exception: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            log_message('error', 'Checkout createOrder exception: ' . get_class($e) . ': ' . $e->getMessage());
             if (isset($orderId)) $orderModel->delete($orderId);
-            return $this->response->setJSON(['status' => 'error', 'message' => 'An error occurred. Please try again.']);
+            return $this->checkoutJson(['status' => 'error', 'message' => 'An error occurred. Please try again.']);
         }
     }
 
@@ -291,14 +321,14 @@ class Checkout extends BaseController
     public function validateCoupon()
     {
         if (!$this->request->isAJAX()) {
-            return $this->response->setJSON(['valid' => false, 'message' => 'Invalid request']);
+            return $this->checkoutJson(['valid' => false, 'message' => 'Invalid request']);
         }
 
         $code = $this->request->getPost('code');
         if (!$code) {
             session()->remove('coupon_code');
             session()->remove('coupon_discount');
-            return $this->response->setJSON(['valid' => false, 'message' => 'Coupon removed']);
+            return $this->checkoutJson(['valid' => false, 'message' => 'Coupon removed']);
         }
 
         $cart = session()->get('cart') ?? [];
@@ -310,9 +340,10 @@ class Checkout extends BaseController
         if ($result['valid']) {
             session()->set('coupon_code', $code);
             session()->set('coupon_discount', $result['discount']);
-            return $this->response->setJSON([
+            return $this->checkoutJson([
                 'valid' => true,
                 'discount' => $result['discount'],
+                'formatted_total' => formatPrice($total),
                 'formatted_discount' => formatPrice($result['discount']),
                 'grand_total' => $total - $result['discount'],
                 'formatted_grand_total' => formatPrice($total - $result['discount']),
@@ -322,7 +353,7 @@ class Checkout extends BaseController
 
         session()->remove('coupon_code');
         session()->remove('coupon_discount');
-        return $this->response->setJSON(['valid' => false, 'message' => $result['message']]);
+        return $this->checkoutJson(['valid' => false, 'message' => $result['message']]);
     }
 
     private function fulfillPaidOrder(array $order, string $paymentId, float $paidAmount, string $source): bool
@@ -347,14 +378,14 @@ class Checkout extends BaseController
         }
 
         $invoiceNo = $order['invoice_no'] ?: 'INV-' . strtoupper(uniqid());
-        $orderModel->update($orderId, [
+        $orderModel->update($orderId, $this->orderData([
             'payment_method'      => 'razorpay',
             'payment_id'          => $paymentId,
             'payment_status'      => 'completed',
             'payment_verified_at' => date('Y-m-d H:i:s'),
             'status'              => 'completed',
             'invoice_no'          => $invoiceNo,
-        ]);
+        ]));
 
         $invoiceModel = model(InvoiceModel::class);
         if (!$invoiceModel->where('order_id', $orderId)->first()) {
@@ -389,7 +420,9 @@ class Checkout extends BaseController
                 sendOrderConfirmation($freshOrder, $items);
                 sendDownloadLinks($freshOrder, $items);
                 sendAdminNotification($freshOrder);
-                $orderModel->update($orderId, ['fulfillment_sent_at' => date('Y-m-d H:i:s')]);
+                if ($this->orderHasField('fulfillment_sent_at')) {
+                    $orderModel->update($orderId, ['fulfillment_sent_at' => date('Y-m-d H:i:s')]);
+                }
             } catch (\Exception $e) {
                 log_message('error', 'Email sending failed after payment fulfillment: ' . $e->getMessage());
             }

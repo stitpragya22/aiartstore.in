@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BY67JPBVPG"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-BY67JPBVPG');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($title ?? 'AI Art Store') ?> | AI Art Store</title>
@@ -19,8 +28,9 @@
     <meta name="twitter:description" content="<?= esc($meta_description ?? 'Discover premium AI-generated art.') ?>">
     <?php if (isset($meta_image) && $meta_image): ?>
     <meta name="twitter:image" content="<?= base_url($meta_image) ?>">
-    <?php endif; ?>
+    <?php endif; ?> 
     <meta name="csrf-token" content="<?= csrf_hash() ?>">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0a0a0f">

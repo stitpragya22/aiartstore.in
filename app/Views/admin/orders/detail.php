@@ -75,8 +75,8 @@
         <div class="card-admin">
             <h5 class="fw-bold mb-3">Order Details</h5>
             <div class="mb-2"><small class="text-muted">Order #</small><br><strong><?= esc($order['order_number']) ?></strong></div>
-            <div class="mb-2"><small class="text-muted">Customer</small><br><strong><?= esc($order['user']['username'] ?? $order['user']['email'] ?? 'N/A') ?></strong></div>
-            <div class="mb-2"><small class="text-muted">Email</small><br><?= esc($order['user']['email'] ?? 'N/A') ?></div>
+            <div class="mb-2"><small class="text-muted">Customer</small><br><strong><?= esc($order['user']?->username ?? $order['user']?->email ?? 'N/A') ?></strong></div>
+            <div class="mb-2"><small class="text-muted">Email</small><br><?= esc($order['user']?->email ?? 'N/A') ?></div>
             <div class="mb-2"><small class="text-muted">Date</small><br><?= date('d M Y, h:i A', strtotime($order['created_at'])) ?></div>
             <hr style="border-color: var(--border-color);">
             <div class="d-flex justify-content-between mb-1"><span class="text-muted">Subtotal</span><span><?= formatPrice($order['subtotal']) ?></span></div>

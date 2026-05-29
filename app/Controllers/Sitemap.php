@@ -8,6 +8,13 @@ use App\Models\BlogPostModel;
 
 class Sitemap extends BaseController
 {
+    private array $shippingCountries = [
+        'AR', 'AU', 'AT', 'BE', 'BR', 'CA', 'CL', 'CO', 'CZ', 'DK', 'FI', 'FR', 'DE', 'GR', 
+        'HK', 'HU', 'IN', 'ID', 'IE', 'IL', 'IT', 'JP', 'MY', 'MX', 'NL', 'NZ', 'NO', 'PH', 
+        'PL', 'PT', 'RO', 'SA', 'SG', 'SK', 'ZA', 'KR', 'ES', 'SE', 'CH', 'TW', 'TH', 'TR', 
+        'UA', 'AE', 'GB', 'US', 'VN'
+    ];
+
     private function ex($str)
     {
         return htmlspecialchars((string)$str, ENT_QUOTES | ENT_XML1, 'UTF-8');
@@ -154,11 +161,13 @@ class Sitemap extends BaseController
             $xml .= '      <g:product_type>' . $this->ex($catMap[$p['category_id']]['name'] ?? '') . '</g:product_type>' . "\n";
             $xml .= '      <g:is_bundle>no</g:is_bundle>' . "\n";
             $xml .= '      <g:multipack>0</g:multipack>' . "\n";
-            $xml .= '      <g:shipping>' . "\n";
-            $xml .= '        <g:country>IN</g:country>' . "\n";
-            $xml .= '        <g:service>Digital Delivery</g:service>' . "\n";
-            $xml .= '        <g:price>0.00 INR</g:price>' . "\n";
-            $xml .= '      </g:shipping>' . "\n";
+            foreach ($this->shippingCountries as $country) {
+                $xml .= '      <g:shipping>' . "\n";
+                $xml .= '        <g:country>' . $country . '</g:country>' . "\n";
+                $xml .= '        <g:service>Digital Delivery</g:service>' . "\n";
+                $xml .= '        <g:price>0.00 ' . $currency . '</g:price>' . "\n";
+                $xml .= '      </g:shipping>' . "\n";
+            }
             if (!empty($p['tags'])) {
                 $xml .= '      <g:custom_label_0>' . $this->ex($p['tags']) . '</g:custom_label_0>' . "\n";
             }
@@ -210,7 +219,7 @@ class Sitemap extends BaseController
             'id', 'title', 'description', 'link', 'image_link',
             'additional_image_link', 'availability', 'price', 'sale_price',
             'brand', 'condition', 'google_product_category', 'product_type',
-            'mpn', 'identifier_exists', 'shipping', 'custom_label_0'
+            'mpn', 'identifier_exists', 'shipping(country:service:price)', 'custom_label_0'
         ]);
 
         foreach ($products as $p) {
@@ -223,6 +232,12 @@ class Sitemap extends BaseController
                 ? base_url('uploads/products/' . $p['image_watermarked'])
                 : '';
             $pId = (int) $p['id'];
+
+            $shippingParts = [];
+            foreach ($this->shippingCountries as $country) {
+                $shippingParts[] = $country . ':Digital Delivery:0.00 ' . $currency;
+            }
+            $shippingString = implode(',', $shippingParts);
 
             fputcsv($out, [
                 $pId,
@@ -240,8 +255,8 @@ class Sitemap extends BaseController
                 $catMap[$p['category_id']]['name'] ?? '',
                 'ART-' . $pId,
                 'FALSE',
-                'IN::Digital Delivery::0.00 INR',
-                $p['tags'] ?? '',
+                $shippingString,
+                substr($p['tags'] ?? '', 0, 150),
             ]);
         }
 
