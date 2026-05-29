@@ -67,3 +67,37 @@
 #--------------------------------------------------------------------
 
 # logger.threshold = 4
+
+#--------------------------------------------------------------------
+# GOOGLE AUTH
+#--------------------------------------------------------------------
+
+# GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID'
+# GOOGLE_CLIENT_SECRET = 'YOUR_GOOGLE_CLIENT_SECRET'
+# GOOGLE_REDIRECT_URI = 'https://yourdomain.com/auth/google/callback'
+
+#--------------------------------------------------------------------
+# RAZORPAY
+#--------------------------------------------------------------------
+
+# RAZORPAY_WEBHOOK_SECRET = 'YOUR_RAZORPAY_WEBHOOK_SECRET'
+
+#--------------------------------------------------------------------
+# EMAIL / SMTP SETTINGS
+#--------------------------------------------------------------------
+
+# email.SMTPHost = 'smtp.yourserver.com'
+# email.SMTPUser = 'info@yourdomain.com'
+# email.SMTPPass = 'YOUR_SMTP_PASSWORD'
+# email.SMTPPort = 465
+# email.SMTPCrypto = 'ssl'
+# email.fromEmail = 'info@yourdomain.com'
+# email.fromName = 'AI Art Store'
+# email.adminEmail = 'info@yourdomain.com'
+
+#--------------------------------------------------------------------
+# DOWNLOAD ACCESS
+#--------------------------------------------------------------------
+
+# downloads.maxDownloads = 10
+# downloads.expiryDays = 365
