@@ -17,9 +17,9 @@
                     <a href="#featured" class="btn btn-outline-custom btn-lg"><i class="bi bi-star me-2"></i>Featured Art</a>
                 </div>
                 <div class="d-flex gap-3 gap-md-4 mt-4 mt-md-5">
-                    <div><span class="stat-number fs-5 fs-md-3 fw-bold" style="background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">500+</span><br><span class="text-muted small">Artworks</span></div>
-                    <div><span class="stat-number fs-5 fs-md-3 fw-bold" style="background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">50+</span><br><span class="text-muted small">Artists</span></div>
-                    <div><span class="stat-number fs-5 fs-md-3 fw-bold" style="background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">1000+</span><br><span class="text-muted small">Happy Customers</span></div>
+                    <div><span class="stat-number fs-5 fs-md-3 fw-bold" style="background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">500+</span><br><span class="text-secondary small">Artworks</span></div>
+                    <div><span class="stat-number fs-5 fs-md-3 fw-bold" style="background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">50+</span><br><span class="text-secondary small">Artists</span></div>
+                    <div><span class="stat-number fs-5 fs-md-3 fw-bold" style="background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">1000+</span><br><span class="text-secondary small">Happy Customers</span></div>
                 </div>
             </div>
             <div class="col-lg-6 mt-5 mt-lg-0">
