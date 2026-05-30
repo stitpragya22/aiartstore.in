@@ -132,6 +132,9 @@
                             <i class="bi bi-lightning-charge me-2"></i>Buy Now
                         </button>
                     </form>
+                    <button class="btn btn-outline-custom btn-wishlist-detail <?= isProductWishlisted($product['id']) ? 'active' : '' ?>" onclick="toggleWishlist(<?= $product['id'] ?>, this)" title="Add to Wishlist">
+                        <i class="bi <?= isProductWishlisted($product['id']) ? 'bi-heart-fill' : 'bi-heart' ?>"></i>
+                    </button>
                 </div>
 
                 <div class="d-flex gap-2 mt-3">
@@ -231,6 +234,9 @@
             <?php foreach ($related as $product): ?>
             <div class="col-md-6 col-lg-3">
                 <div class="card-art position-relative">
+                    <button class="btn-wishlist <?= isProductWishlisted($product['id']) ? 'active' : '' ?>" onclick="toggleWishlist(<?= $product['id'] ?>, this)" title="Add to Wishlist">
+                        <i class="bi <?= isProductWishlisted($product['id']) ? 'bi-heart-fill' : 'bi-heart' ?>"></i>
+                    </button>
                     <div class="art-image-wrapper">
                         <?php if ($product['image_watermarked']): ?>
                             <?php $img = base_url('uploads/products/' . $product['image_watermarked']); ?>

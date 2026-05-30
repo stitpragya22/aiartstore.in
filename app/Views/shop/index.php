@@ -130,6 +130,9 @@
                 <?php foreach ($products as $product): ?>
                 <div class="col-md-6 col-lg-3">
                     <div class="card-art position-relative">
+                        <button class="btn-wishlist <?= isProductWishlisted($product['id']) ? 'active' : '' ?>" onclick="toggleWishlist(<?= $product['id'] ?>, this)" title="Add to Wishlist">
+                            <i class="bi <?= isProductWishlisted($product['id']) ? 'bi-heart-fill' : 'bi-heart' ?>"></i>
+                        </button>
                         <div class="art-image-wrapper">
                             <?php $img = $product['image_watermarked'] ? base_url('uploads/products/' . $product['image_watermarked']) : ($product['image'] ? base_url('uploads/products/' . $product['image']) : null); ?>
                             <?php if ($img): ?>

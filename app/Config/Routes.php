@@ -53,6 +53,8 @@ $routes->group('', ['filter' => 'session'], static function ($routes) {
     $routes->get('/download/file/(:segment)', 'Download::fileByToken/$1');
     $routes->get('/download/file/(:num)/(:num)', 'Download::file/$1/$2');
     $routes->get('/download/invoice/(:num)', 'Download::invoice/$1');
+    $routes->get('/wishlist', 'Wishlist::index');
+    $routes->post('/wishlist/toggle', 'Wishlist::toggle');
 });
 
 // Sitemaps / Feeds

@@ -516,6 +516,72 @@
         body { -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
         * { -webkit-overflow-scrolling: touch; }
         .touch-ripple:active { transform: scale(0.97); }
+
+        /* Wishlist CSS */
+        .btn-wishlist {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 10;
+            background: rgba(10, 10, 15, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            padding: 0;
+            cursor: pointer;
+        }
+        .btn-wishlist:hover {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+            transform: scale(1.1);
+        }
+        .btn-wishlist.active i {
+            color: #ff4757;
+        }
+        .btn-wishlist.active {
+            background: rgba(255, 71, 87, 0.1);
+            border-color: rgba(255, 71, 87, 0.3);
+        }
+        .btn-wishlist.active:hover {
+            background: #ff4757;
+            border-color: #ff4757;
+        }
+        .btn-wishlist.active:hover i {
+            color: white;
+        }
+        .btn-wishlist-detail {
+            width: 50px;
+            height: 50px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px !important;
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        .btn-wishlist-detail.active {
+            border-color: rgba(255, 71, 87, 0.4);
+            background: rgba(255, 71, 87, 0.1);
+        }
+        .btn-wishlist-detail.active i {
+            color: #ff4757;
+        }
+        .btn-wishlist-detail.active:hover {
+            background: #ff4757;
+            border-color: #ff4757;
+        }
+        .btn-wishlist-detail.active:hover i {
+            color: white;
+        }
     </style>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -539,6 +605,10 @@
                     <li class="nav-item"><a class="nav-link <?= strpos(current_url(), '/downloads') !== false ? 'active' : '' ?>" href="<?= site_url('/downloads') ?>">Downloads</a></li>
                 </ul>
                 <div class="d-flex align-items-center gap-2">
+                    <a href="<?= site_url('/wishlist') ?>" class="btn btn-cart" title="My Wishlist">
+                        <i class="bi bi-heart"></i>
+                        <span class="cart-badge" style="background: linear-gradient(135deg, #ef4444, #ff4757);" id="wishlistCount"><?= getWishlistCount() ?></span>
+                    </a>
                     <a href="<?= site_url('/cart') ?>" class="btn btn-cart">
                         <i class="bi bi-bag"></i>
                         <span class="cart-badge" id="cartCount"><?= getCartCount() ?></span>

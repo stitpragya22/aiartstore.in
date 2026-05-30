@@ -18,6 +18,7 @@
                         <li class="mb-2"><a href="<?= site_url('/shop') ?>" class="text-decoration-none text-muted">Gallery</a></li>
                         <li class="mb-2"><a href="<?= site_url('/cart') ?>" class="text-decoration-none text-muted">Cart</a></li>
                         <li class="mb-2"><a href="<?= site_url('/orders') ?>" class="text-decoration-none text-muted">Orders</a></li>
+                        <li class="mb-2"><a href="<?= site_url('/wishlist') ?>" class="text-decoration-none text-muted">Wishlist</a></li>
                     </ul>
                 </div>
                 <div class="col-md-2">
@@ -66,6 +67,50 @@
                 $('#cartCount').text(data.count);
             }).fail(function() {
                 console.error('Failed to update cart count');
+            });
+        }
+
+        function toggleWishlist(productId, element) {
+            var $btn = $(element);
+            $.ajax({
+                url: '<?= site_url('/wishlist/toggle') ?>',
+                type: 'POST',
+                data: { product_id: productId },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        if (response.action === 'added') {
+                            $btn.addClass('active');
+                            $btn.find('i').removeClass('bi-heart').addClass('bi-heart-fill');
+                            showToast('Product added to wishlist', 'success');
+                        } else {
+                            $btn.removeClass('active');
+                            $btn.find('i').removeClass('bi-heart-fill').addClass('bi-heart');
+                            showToast('Product removed from wishlist', 'success');
+                            
+                            // If we are on the wishlist page, fade out the item's card
+                            if (window.location.pathname.indexOf('/wishlist') !== -1) {
+                                $btn.closest('.col-lg-3, .col-md-4, .col-sm-6, .col-12, .card-art').fadeOut(400, function() {
+                                    $(this).remove();
+                                    if ($('.wishlist-grid').children(':visible').length === 0) {
+                                        location.reload();
+                                    }
+                                });
+                            }
+                        }
+                        $('#wishlistCount').text(response.count);
+                    } else {
+                        showToast(response.message, 'error');
+                        if (response.message.toLowerCase().indexOf('login') !== -1) {
+                            setTimeout(function() {
+                                window.location.href = '<?= site_url('/login') ?>';
+                            }, 1500);
+                        }
+                    }
+                },
+                error: function() {
+                    showToast('Something went wrong. Please try again.', 'error');
+                }
             });
         }
     </script>
