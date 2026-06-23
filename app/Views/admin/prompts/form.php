@@ -141,6 +141,15 @@
     </form>
 </div>
 
+<style>
+.note-editor .note-editing-area .note-editable {
+    background: #fff !important;
+    color: #1a1a2e !important;
+}
+.note-editor .note-toolbar {
+    background: #f5f5f5 !important;
+}
+</style>
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
 <script>
