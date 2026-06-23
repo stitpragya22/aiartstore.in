@@ -159,8 +159,9 @@ $(document).ready(function() {
         height: 250,
         dialogsInBody: true,
         toolbar: [
-            ['style', ['bold', 'italic', 'underline']],
-            ['para', ['ul', 'ol']],
+            ['style', ['bold', 'italic', 'underline', 'clear']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
             ['insert', ['link']],
             ['view', ['codeview']],
         ],
