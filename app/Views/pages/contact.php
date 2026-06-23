@@ -47,6 +47,13 @@
         </div>
         <div class="row mt-4">
             <div class="col-12">
+                <div class="ratio" style="--bs-aspect-ratio: 50%;">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2871.4776830584556!2d74.73227037520645!3d19.11928658209427!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bdcbb4b23d4156b%3A0x598d5bc22d6ab14f!2sStitpragya%20Technologies!5e1!3m2!1sen!2sin!4v1782223484668!5m2!1sen!2sin" style="border:0; border-radius: 12px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-12">
                 <div class="stat-card p-4 text-center">
                     <p class="text-secondary mb-0">
                         Managed by <strong style="color: var(--accent-primary);">Stitpragya Technologies</strong>,
