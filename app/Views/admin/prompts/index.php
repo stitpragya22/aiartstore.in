@@ -149,7 +149,11 @@ $(document).ready(function() {
             '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
         }, function(res) {
             if (res.success) {
-                showToast('Facebook ' + label + ' posted successfully!', 'success');
+                var msg = 'Facebook ' + label + ' posted successfully!';
+                if (res.data && res.data.post_url) {
+                    msg += ' <a href="' + res.data.post_url + '" target="_blank" style="color: var(--accent-primary); text-decoration: underline;">View post</a>';
+                }
+                showToast(msg, 'success');
             } else {
                 showToast(res.message || 'Failed to post', 'error');
             }

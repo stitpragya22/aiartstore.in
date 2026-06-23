@@ -65,7 +65,12 @@ class SocialMediaSharing
             'access_token' => $this->facebookAccessToken,
         ];
 
-        return $this->callGraphApi($apiUrl, $postData);
+        $result = $this->callGraphApi($apiUrl, $postData);
+        if ($result['success'] && isset($result['data']['id'])) {
+            $parts = explode('_', $result['data']['id']);
+            $result['data']['post_url'] = 'https://www.facebook.com/' . $this->facebookPageId . '/posts/' . end($parts);
+        }
+        return $result;
     }
 
     public function shareToFacebookPhoto(array $prompt, array $images): array
@@ -106,24 +111,60 @@ class SocialMediaSharing
         $url = site_url('/prompts/' . $prompt['id'] . '/' . $slug);
         $message = $title . "\n\n" . $url;
 
-        $uploaded = 0;
-        foreach ($images as $i => $image) {
-            $caption = $message;
-            if (count($images) > 1) {
-                $caption .= "\n\n[" . ($i + 1) . '/' . count($images) . ']';
-            }
+        $apiUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/photos?access_token=" . urlencode($this->facebookAccessToken);
 
-            $result = $this->uploadPhoto($image, $caption);
-            if ($result['success']) {
-                $uploaded++;
+        $mediaIds = [];
+        foreach ($images as $image) {
+            $filePath = FCPATH . 'uploads/prompts/' . $image['image'];
+            if (!is_file($filePath)) continue;
+
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL            => $apiUrl,
+                CURLOPT_POST           => true,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_TIMEOUT        => 60,
+                CURLOPT_POSTFIELDS     => [
+                    'published' => 'false',
+                    'source'    => new \CURLFile($filePath),
+                ],
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpCode >= 200 && $httpCode < 300) {
+                $data = json_decode($response, true);
+                if (!isset($data['error']) && isset($data['id'])) {
+                    $mediaIds[] = $data['id'];
+                }
             }
         }
 
-        if ($uploaded === 0) {
+        if (empty($mediaIds)) {
             return $this->shareToFacebookLink($prompt);
         }
 
-        return ['success' => true, 'message' => $uploaded . ' photo(s) posted to Facebook', 'data' => ['count' => $uploaded]];
+        $attachedMedia = [];
+        foreach ($mediaIds as $fbid) {
+            $attachedMedia[] = ['media_fbid' => $fbid];
+        }
+
+        $publishUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/feed";
+        $publishData = [
+            'message'        => $message,
+            'attached_media' => json_encode($attachedMedia),
+            'access_token'   => $this->facebookAccessToken,
+        ];
+
+        $result = $this->callGraphApi($publishUrl, $publishData);
+        if ($result['success'] && isset($result['data']['id'])) {
+            $parts = explode('_', $result['data']['id']);
+            $result['data']['post_url'] = 'https://www.facebook.com/' . $this->facebookPageId . '/posts/' . end($parts);
+        }
+        return $result;
     }
 
     private function uploadPhoto(array $image, string $caption): array
@@ -168,6 +209,9 @@ class SocialMediaSharing
         $data = json_decode($response, true);
 
         if ($httpCode >= 200 && $httpCode < 300 && !isset($data['error'])) {
+            if (isset($data['id'])) {
+                $data['post_url'] = 'https://www.facebook.com/photo.php?fbid=' . $data['id'];
+            }
             return ['success' => true, 'message' => 'Photo posted successfully', 'data' => $data];
         }
 
