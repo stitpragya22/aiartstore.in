@@ -44,7 +44,7 @@ class SocialMediaSharing
         return !empty($this->instagramBusinessId) && !empty($this->instagramAccessToken);
     }
 
-    public function shareToFacebook(array $prompt): array
+    public function shareToFacebookLink(array $prompt): array
     {
         if (!$this->isFacebookConfigured()) {
             return ['success' => false, 'message' => 'Facebook credentials not configured'];
@@ -74,22 +74,124 @@ class SocialMediaSharing
             return ['success' => false, 'message' => 'Facebook credentials not configured'];
         }
 
+        if (empty($images)) {
+            return ['success' => false, 'message' => 'No images to share'];
+        }
+
+        $firstImage = $images[0];
+        $imageUrl = base_url('uploads/prompts/' . $firstImage['image']);
+
         $title = $prompt['seo_title'] ?: $prompt['title'];
-        $description = $prompt['seo_description'] ?: 'Check out this AI prompt at AI Art Store';
         $slug = $prompt['slug'] ?? url_title($prompt['title'], '-', true);
         $url = site_url('/prompts/' . $prompt['id'] . '/' . $slug);
 
-        $message = $title . "\n\n" . $description . "\n\n" . $url;
+        $caption = $title . "\n\n" . $url;
 
-        $apiUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/feed";
+        $apiUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/photos";
 
         $postData = [
-            'message'      => $message,
-            'link'         => $url,
+            'url'          => $imageUrl,
+            'caption'      => $caption,
             'access_token' => $this->facebookAccessToken,
         ];
 
         return $this->callGraphApi($apiUrl, $postData);
+    }
+
+    public function shareToFacebookGallery(array $prompt, array $images): array
+    {
+        if (!$this->isFacebookConfigured()) {
+            return ['success' => false, 'message' => 'Facebook credentials not configured'];
+        }
+
+        if (empty($images)) {
+            return ['success' => false, 'message' => 'No images to share'];
+        }
+
+        $title = $prompt['seo_title'] ?: $prompt['title'];
+        $slug = $prompt['slug'] ?? url_title($prompt['title'], '-', true);
+        $url = site_url('/prompts/' . $prompt['id'] . '/' . $slug);
+
+        $message = $title . "\n\n" . $url;
+
+        $mediaIds = [];
+        foreach ($images as $image) {
+            $imageUrl = base_url('uploads/prompts/' . $image['image']);
+
+            $photoUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/photos";
+            $photoData = [
+                'url'          => $imageUrl,
+                'published'    => 'false',
+                'access_token' => $this->facebookAccessToken,
+            ];
+
+            $photoResult = $this->callGraphApi($photoUrl, $photoData);
+            if (!$photoResult['success']) {
+                return $photoResult;
+            }
+
+            $mediaFbid = $photoResult['data']['id'] ?? null;
+            if ($mediaFbid) {
+                $mediaIds[] = $mediaFbid;
+            }
+        }
+
+        if (empty($mediaIds)) {
+            return ['success' => false, 'message' => 'Failed to upload any images'];
+        }
+
+        $attachedMedia = [];
+        foreach ($mediaIds as $fbid) {
+            $attachedMedia[] = ['media_fbid' => $fbid];
+        }
+
+        $publishUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/feed";
+        $publishData = [
+            'message'        => $message,
+            'attached_media' => json_encode($attachedMedia),
+            'access_token'   => $this->facebookAccessToken,
+        ];
+
+        return $this->callGraphApi($publishUrl, $publishData);
+    }
+
+    public function getPageAccessToken(string $userToken): array
+    {
+        $apiUrl = "https://graph.facebook.com/v25.0/me/accounts?access_token=" . urlencode($userToken);
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL            => $apiUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_TIMEOUT        => 30,
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            return ['success' => false, 'message' => 'cURL error: ' . $error];
+        }
+
+        $data = json_decode($response, true);
+
+        if ($httpCode >= 200 && $httpCode < 300 && !isset($data['error'])) {
+            $pages = [];
+            foreach ($data['data'] ?? [] as $page) {
+                $pages[] = [
+                    'id'           => $page['id'],
+                    'name'         => $page['name'],
+                    'access_token' => $page['access_token'],
+                ];
+            }
+            return ['success' => true, 'data' => $pages];
+        }
+
+        $errorMsg = $data['error']['message'] ?? ($data['message'] ?? 'Unknown API error');
+        return ['success' => false, 'message' => 'API error: ' . $errorMsg];
     }
 
     public function shareToInstagram(array $prompt, array $images): array
@@ -111,7 +213,6 @@ class SocialMediaSharing
 
         $caption = $title . "\n\nDownload and try this prompt at " . $url . "\n\n#aiart #aiprompts #digitalart #aiartstore";
 
-        // Step 1: Create media container
         $createUrl = "https://graph.facebook.com/v25.0/{$this->instagramBusinessId}/media";
         $createData = [
             'image_url'    => $imageUrl,
@@ -131,7 +232,6 @@ class SocialMediaSharing
 
         sleep(3);
 
-        // Step 2: Publish the media container
         $publishUrl = "https://graph.facebook.com/v25.0/{$this->instagramBusinessId}/media_publish";
         $publishData = [
             'creation_id'  => $creationId,

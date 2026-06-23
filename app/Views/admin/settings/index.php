@@ -121,16 +121,39 @@
         <hr class="my-4" style="border-color: var(--border-color);">
 
         <h5 class="fw-bold mb-3"><i class="bi bi-share me-2" style="color: var(--accent-primary);"></i>Social Media Sharing</h5>
-        <p class="text-muted mb-4">Connect your Facebook Page and Instagram Business account to share prompts directly from the admin panel. <a href="https://developers.facebook.com/docs/facebook-login/guides/access-tokens/" target="_blank" style="color: var(--accent-primary);">Learn how to get tokens</a></p>
+        <p class="text-muted mb-4">Connect your Facebook Page and Instagram Business account to share prompts directly from the admin panel.</p>
+
+        <div class="mb-4 p-3" style="border: 1px solid rgba(99,102,241,0.3); border-radius: 12px; background: rgba(99,102,241,0.05);">
+            <h6 class="fw-bold mb-2" style="color: var(--accent-primary);"><i class="bi bi-info-circle me-1"></i>Required Facebook Permissions (Graph API v25.0)</h6>
+            <p class="small mb-1">Your Facebook App must have these permissions approved:</p>
+            <ul class="small mb-2" style="list-style: none; padding-left: 0;">
+                <li><i class="bi bi-check-circle me-1" style="color: var(--success);"></i> <code>pages_manage_posts</code> &mdash; Publish posts to your Page</li>
+                <li><i class="bi bi-check-circle me-1" style="color: var(--success);"></i> <code>pages_read_engagement</code> &mdash; Read Page engagement data</li>
+                <li><i class="bi bi-check-circle me-1" style="color: var(--success);"></i> <code>pages_show_list</code> &mdash; List Pages you manage</li>
+            </ul>
+            <p class="small mb-0">Get your Page Access Token from the <a href="https://developers.facebook.com/tools/explorer/" target="_blank" style="color: var(--accent-primary);">Graph API Explorer</a>:
+            <br>1. Select your app &rarr; Get User Token with the permissions above &rarr; <code>GET /me/accounts</code> &rarr; copy your Page's <code>access_token</code>.</p>
+        </div>
 
         <div class="mb-3">
             <label class="form-label fw-semibold">Facebook Page ID</label>
-            <input type="text" name="facebook_page_id" class="form-control" value="<?= old('facebook_page_id', $settings['facebook_page_id'] ?? '') ?>" placeholder="Your Facebook Page ID">
+            <input type="text" name="facebook_page_id" id="facebook_page_id" class="form-control" value="<?= old('facebook_page_id', $settings['facebook_page_id'] ?? '') ?>" placeholder="Your Facebook Page ID">
         </div>
 
         <div class="mb-3">
             <label class="form-label fw-semibold">Facebook Page Access Token</label>
-            <input type="password" name="facebook_access_token" class="form-control" value="<?= old('facebook_access_token', $settings['facebook_access_token'] ?? '') ?>" placeholder="Long-lived Page Access Token">
+            <input type="password" name="facebook_access_token" id="facebook_access_token" class="form-control" value="<?= old('facebook_access_token', $settings['facebook_access_token'] ?? '') ?>" placeholder="Page Access Token with pages_manage_posts + pages_read_engagement">
+        </div>
+
+        <div class="mb-4 p-3" style="border: 1px dashed rgba(99,102,241,0.3); border-radius: 12px; background: rgba(99,102,241,0.03);">
+            <h6 class="fw-bold mb-2" style="font-size: 0.85rem;"><i class="bi bi-magic me-1"></i>Fetch Page Token Automatically</h6>
+            <p class="small text-muted mb-2">Paste a User Access Token (with <code>pages_manage_posts</code>, <code>pages_read_engagement</code>, <code>pages_show_list</code>) to fetch your pages:</p>
+            <div class="input-group mb-2">
+                <input type="text" id="fb_user_token" class="form-control" placeholder="EAAx... user access token" style="font-size: 0.8rem;">
+                <button type="button" id="fetchPagesBtn" class="btn btn-outline-custom" style="font-size: 0.8rem;">Fetch Pages</button>
+            </div>
+            <div id="pagesList" class="small"></div>
+            <div id="fetchError" class="small text-danger mt-1"></div>
         </div>
 
         <div class="mb-3">
@@ -140,7 +163,7 @@
 
         <div class="mb-4">
             <label class="form-label fw-semibold">Instagram Access Token</label>
-            <input type="password" name="instagram_access_token" class="form-control" value="<?= old('instagram_access_token', $settings['instagram_access_token'] ?? '') ?>" placeholder="Instagram/ Facebook Graph Access Token">
+            <input type="password" name="instagram_access_token" class="form-control" value="<?= old('instagram_access_token', $settings['instagram_access_token'] ?? '') ?>" placeholder="Instagram / Facebook Graph Access Token">
         </div>
 
         <button type="submit" class="btn btn-primary-custom"><i class="bi bi-check-lg me-1"></i>Save Settings</button>
@@ -162,6 +185,51 @@ $(document).ready(function() {
     }
     $('input[name="razorpay_mode"]').change(toggleKeyVisibility);
     toggleKeyVisibility();
+
+    $('#fetchPagesBtn').click(function() {
+        var token = $('#fb_user_token').val().trim();
+        if (!token) {
+            $('#fetchError').text('Please enter a User Access Token');
+            return;
+        }
+        $('#fetchError').text('');
+        $('#pagesList').html('<span class="text-muted">Fetching pages...</span>');
+        $(this).prop('disabled', true);
+
+        $.post('<?= site_url('/admin/settings/fetch-facebook-pages') ?>', {
+            '<?= csrf_token() ?>': '<?= csrf_hash() ?>',
+            'user_token': token
+        }, function(res) {
+            if (res.success && res.data && res.data.length > 0) {
+                var html = '<div class="mt-2"><strong>Select a page:</strong></div>';
+                res.data.forEach(function(page) {
+                    html += '<div class="form-check mt-1">';
+                    html += '  <input class="form-check-input page-option" type="radio" name="fb_page" id="page_' + page.id + '"';
+                    html += '    data-id="' + page.id + '" data-token="' + page.access_token + '">';
+                    html += '  <label class="form-check-label" for="page_' + page.id + '">' + page.name + ' <code class="ms-1">' + page.id + '</code></label>';
+                    html += '</div>';
+                });
+                html += '<button type="button" id="applyPageBtn" class="btn btn-sm btn-primary-custom mt-2">Apply Selected Page</button>';
+                $('#pagesList').html(html);
+            } else if (res.success && res.data && res.data.length === 0) {
+                $('#pagesList').html('<span class="text-danger">No pages found for this token.</span>');
+            } else {
+                $('#pagesList').html('<span class="text-danger">' + (res.message || 'Failed to fetch pages') + '</span>');
+            }
+        }).fail(function() {
+            $('#pagesList').html('<span class="text-danger">Request failed. Check the token.</span>');
+        }).always(function() {
+            $('#fetchPagesBtn').prop('disabled', false);
+        });
+    });
+
+    $(document).on('click', '#applyPageBtn', function() {
+        var selected = $('.page-option:checked');
+        if (selected.length === 0) return;
+        $('#facebook_page_id').val(selected.data('id'));
+        $('#facebook_access_token').val(selected.data('token'));
+        $('#pagesList').html('<span class="text-success">Page applied! Save settings below.</span>');
+    });
 });
 </script>
 

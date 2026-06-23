@@ -117,6 +117,7 @@ $routes->group('admin', ['filter' => 'group:superadmin,admin,developer'], functi
 
     $routes->get('settings', 'Admin\Settings::index');
     $routes->post('settings', 'Admin\Settings::index');
+    $routes->post('settings/fetch-facebook-pages', 'Admin\Settings::fetchFacebookPages');
 
     $routes->get('users', 'Admin\Users::index');
     $routes->post('users/toggle-group/(:num)', 'Admin\Users::toggleGroup/$1');
@@ -144,7 +145,9 @@ $routes->group('admin', ['filter' => 'group:superadmin,admin,developer'], functi
     $routes->post('prompts/edit/(:num)', 'Admin\Prompts::edit/$1');
     $routes->post('prompts/delete/(:num)', 'Admin\Prompts::delete/$1');
     $routes->post('prompts/delete-image/(:num)', 'Admin\Prompts::deleteImage/$1');
-    $routes->post('prompts/share-facebook/(:num)', 'Admin\Prompts::shareFacebook/$1');
+    $routes->post('prompts/share-facebook/(:num)', 'Admin\Prompts::shareFacebookLink/$1');
+    $routes->post('prompts/share-facebook-photo/(:num)', 'Admin\Prompts::shareFacebookPhoto/$1');
+    $routes->post('prompts/share-facebook-gallery/(:num)', 'Admin\Prompts::shareFacebookGallery/$1');
     $routes->post('prompts/share-instagram/(:num)', 'Admin\Prompts::shareInstagram/$1');
 
     // Coupons

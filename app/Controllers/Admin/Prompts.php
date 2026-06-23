@@ -162,7 +162,24 @@ class Prompts extends BaseController
         return redirect()->back()->with('message', 'Image removed');
     }
 
-    public function shareFacebook($id = null)
+    public function shareFacebookLink($id = null)
+    {
+        if (!$this->request->is('post')) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
+        }
+
+        $prompt = $this->promptModel->find($id);
+        if (!$prompt) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Prompt not found']);
+        }
+
+        $sharer = new SocialMediaSharing();
+        $result = $sharer->shareToFacebookLink($prompt);
+
+        return $this->response->setJSON($result);
+    }
+
+    public function shareFacebookPhoto($id = null)
     {
         if (!$this->request->is('post')) {
             return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
@@ -177,6 +194,25 @@ class Prompts extends BaseController
 
         $sharer = new SocialMediaSharing();
         $result = $sharer->shareToFacebookPhoto($prompt, $images);
+
+        return $this->response->setJSON($result);
+    }
+
+    public function shareFacebookGallery($id = null)
+    {
+        if (!$this->request->is('post')) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
+        }
+
+        $prompt = $this->promptModel->find($id);
+        if (!$prompt) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Prompt not found']);
+        }
+
+        $images = $this->promptImageModel->where('prompt_id', $id)->orderBy('id', 'ASC')->findAll();
+
+        $sharer = new SocialMediaSharing();
+        $result = $sharer->shareToFacebookGallery($prompt, $images);
 
         return $this->response->setJSON($result);
     }

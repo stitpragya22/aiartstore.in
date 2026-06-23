@@ -80,7 +80,14 @@
                         <span class="badge-status <?= $p['status'] ?>" style="font-size: 0.6rem;"><?= ucfirst($p['status']) ?></span>
                     </div>
                     <div class="d-flex gap-1">
-                        <button type="button" class="btn btn-sm btn-outline-custom share-fb" data-id="<?= $p['id'] ?>" style="padding: 2px 10px; font-size: 0.75rem; border-color: rgba(59,89,152,0.3); color: #3b5998;" title="Share to Facebook"><i class="bi bi-facebook"></i></button>
+                        <div class="dropdown d-inline">
+                            <button type="button" class="btn btn-sm btn-outline-custom dropdown-toggle share-fb" data-id="<?= $p['id'] ?>" style="padding: 2px 10px; font-size: 0.75rem; border-color: rgba(59,89,152,0.3); color: #3b5998;" title="Share to Facebook" data-bs-toggle="dropdown"><i class="bi bi-facebook"></i></button>
+                            <ul class="dropdown-menu dropdown-menu-end" style="min-width: 140px; font-size: 0.8rem;">
+                                <li><a class="dropdown-item share-fb-link" href="#" data-id="<?= $p['id'] ?>"><i class="bi bi-link-45deg me-2"></i>Share Link</a></li>
+                                <li><a class="dropdown-item share-fb-photo" href="#" data-id="<?= $p['id'] ?>"><i class="bi bi-image me-2"></i>Share Photo</a></li>
+                                <li><a class="dropdown-item share-fb-gallery" href="#" data-id="<?= $p['id'] ?>"><i class="bi bi-images me-2"></i>Share Gallery</a></li>
+                            </ul>
+                        </div>
                         <button type="button" class="btn btn-sm btn-outline-custom share-ig" data-id="<?= $p['id'] ?>" style="padding: 2px 10px; font-size: 0.75rem; border-color: rgba(228,64,95,0.3); color: #e4405f;" title="Share to Instagram"><i class="bi bi-instagram"></i></button>
                         <a href="<?= site_url('/admin/prompts/edit/' . $p['id']) ?>" class="btn btn-sm btn-outline-custom" style="padding: 2px 10px; font-size: 0.75rem;" title="Edit"><i class="bi bi-pencil"></i></a>
                         <form action="<?= site_url('/admin/prompts/delete/' . $p['id']) ?>" method="POST" onsubmit="return confirm('Delete this prompt and all its images?')" class="d-inline">
@@ -121,8 +128,48 @@ $(document).ready(function() {
         });
     }
 
-    $(document).on('click', '.share-fb', function() {
-        sharePrompt($(this), 'fb');
+    function shareFacebook(button, type) {
+        var id = button.data('id');
+        var urlMap = {
+            'link': '<?= site_url('/admin/prompts/share-facebook/') ?>' + id,
+            'photo': '<?= site_url('/admin/prompts/share-facebook-photo/') ?>' + id,
+            'gallery': '<?= site_url('/admin/prompts/share-facebook-gallery/') ?>' + id,
+        };
+        var url = urlMap[type];
+        if (!url) return;
+
+        var label = type.charAt(0).toUpperCase() + type.slice(1);
+        button.closest('.dropdown').find('.share-fb').prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span>');
+
+        $.post(url, {
+            '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+        }, function(res) {
+            if (res.success) {
+                showToast('Facebook ' + label + ' posted successfully!', 'success');
+            } else {
+                showToast(res.message || 'Failed to post', 'error');
+            }
+        }).fail(function() {
+            showToast('Request failed. Check your credentials in settings.', 'error');
+        }).always(function() {
+            var btn = button.closest('.dropdown').find('.share-fb');
+            btn.prop('disabled', false).html('<i class="bi bi-facebook"></i>');
+        });
+    }
+
+    $(document).on('click', '.share-fb-link', function(e) {
+        e.preventDefault();
+        shareFacebook($(this), 'link');
+    });
+
+    $(document).on('click', '.share-fb-photo', function(e) {
+        e.preventDefault();
+        shareFacebook($(this), 'photo');
+    });
+
+    $(document).on('click', '.share-fb-gallery', function(e) {
+        e.preventDefault();
+        shareFacebook($(this), 'gallery');
     });
 
     $(document).on('click', '.share-ig', function() {

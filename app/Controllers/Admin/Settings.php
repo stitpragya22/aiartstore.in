@@ -82,6 +82,23 @@ class Settings extends BaseController
         return view('admin/settings/index', $data);
     }
 
+    public function fetchFacebookPages()
+    {
+        if (!$this->request->is('post')) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
+        }
+
+        $userToken = $this->request->getPost('user_token');
+        if (empty($userToken)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'User token is required']);
+        }
+
+        $sharer = new SocialMediaSharing();
+        $result = $sharer->getPageAccessToken($userToken);
+
+        return $this->response->setJSON($result);
+    }
+
     private function saveUploadedImage(string $field, string $class): void
     {
         $file = $this->request->getFile($field);
