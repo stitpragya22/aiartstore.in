@@ -149,17 +149,7 @@
 .note-editor .note-toolbar {
     background: #f5f5f5 !important;
 }
-.note-modal {
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    margin: 0 !important;
-    z-index: 9999 !important;
-}
-.note-modal-backdrop {
-    z-index: 9998 !important;
-}
+
 </style>
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
@@ -167,6 +157,7 @@
 $(document).ready(function() {
     $('#notesEditor').summernote({
         height: 250,
+        dialogsInBody: true,
         toolbar: [
             ['style', ['bold', 'italic', 'underline']],
             ['para', ['ul', 'ol']],
