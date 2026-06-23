@@ -14,6 +14,13 @@
                             <a href="mailto:support@aiartstore.in" class="text-decoration-none text-secondary">support@aiartstore.in</a>
                         </div>
                     </div>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <i class="bi bi-envelope fs-4" style="color: var(--accent-primary);"></i>
+                        <div>
+                            <strong>Secondary Email</strong><br>
+                            <a href="mailto:info@stitpragya.in" class="text-decoration-none text-secondary">info@stitpragya.in</a>
+                        </div>
+                    </div>
                     <div class="d-flex align-items-center gap-3">
                         <i class="bi bi-clock fs-4" style="color: var(--accent-primary);"></i>
                         <div>
@@ -35,6 +42,16 @@
                             <span class="text-secondary">For order-specific issues, include your order number for faster assistance.</span>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="stat-card p-4 text-center">
+                    <p class="text-secondary mb-0">
+                        Managed by <strong style="color: var(--accent-primary);">Stitpragya Technologies</strong>,
+                        Savedi, Ahilyangar, MH, IND
+                    </p>
                 </div>
             </div>
         </div>
