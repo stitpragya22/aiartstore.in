@@ -78,7 +78,7 @@ class Filters extends BaseFilters
      */
     public array $globals = [
         'before' => [
-            'csrf' => ['except' => ['razorpay/webhook']],
+            'csrf' => ['except' => ['razorpay/webhook', 'admin/prompts/share-facebook*', 'admin/prompts/share-facebook-photo/*', 'admin/prompts/share-facebook-gallery/*', 'admin/prompts/share-instagram/*', 'admin/settings/fetch-facebook-pages', 'admin/settings/test-facebook-token']],
             // 'honeypot',
             // 'invalidchars',
         ],
