@@ -209,7 +209,7 @@
 
                     <?php if (!empty($prompt['notes'])): ?>
                     <h6 class="fw-semibold mb-2 mt-3">Notes</h6>
-                    <p class="text-muted small mb-0"><?= esc($prompt['notes']) ?></p>
+                    <div class="text-muted small mb-0"><?= $prompt['notes'] ?></div>
                     <?php endif; ?>
                 </div>
             </div>
