@@ -57,7 +57,7 @@ class SocialMediaSharing
 
         $message = $title . "\n\n" . $description . "\n\n" . $url;
 
-        $apiUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/published_posts";
+        $apiUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/feed";
 
         $postData = [
             'message'      => $message,
@@ -74,46 +74,22 @@ class SocialMediaSharing
             return ['success' => false, 'message' => 'Facebook credentials not configured'];
         }
 
-        if (empty($images)) {
-            return ['success' => false, 'message' => 'No images to share'];
-        }
-
-        $firstImage = $images[0];
-        $imageUrl = base_url('uploads/prompts/' . $firstImage['image']);
-
         $title = $prompt['seo_title'] ?: $prompt['title'];
+        $description = $prompt['seo_description'] ?: 'Check out this AI prompt at AI Art Store';
         $slug = $prompt['slug'] ?? url_title($prompt['title'], '-', true);
         $url = site_url('/prompts/' . $prompt['id'] . '/' . $slug);
 
-        $message = $title . "\n\n" . $url;
+        $message = $title . "\n\n" . $description . "\n\n" . $url;
 
-        // Step 1: Upload photo with published=false to get media_fbid
-        $photoUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/photos";
-        $photoData = [
-            'url'          => $imageUrl,
-            'published'    => 'false',
+        $apiUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/feed";
+
+        $postData = [
+            'message'      => $message,
+            'link'         => $url,
             'access_token' => $this->facebookAccessToken,
         ];
 
-        $photoResult = $this->callGraphApi($photoUrl, $photoData);
-        if (!$photoResult['success']) {
-            return $photoResult;
-        }
-
-        $mediaFbid = $photoResult['data']['id'] ?? null;
-        if (!$mediaFbid) {
-            return ['success' => false, 'message' => 'Failed to get photo upload ID'];
-        }
-
-        // Step 2: Create published post with attached media
-        $publishUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/published_posts";
-        $publishData = [
-            'message'       => $message,
-            'attached_media' => '[{"media_fbid":"' . $mediaFbid . '"}]',
-            'access_token'  => $this->facebookAccessToken,
-        ];
-
-        return $this->callGraphApi($publishUrl, $publishData);
+        return $this->callGraphApi($apiUrl, $postData);
     }
 
     public function shareToInstagram(array $prompt, array $images): array
