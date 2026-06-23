@@ -55,7 +55,8 @@ class SocialMediaSharing
         $slug = $prompt['slug'] ?? strtolower(trim(preg_replace('/[^a-z0-9]+/', '-', $prompt['title']), '-'));
         $url = site_url('/prompts/' . $prompt['id'] . '/' . $slug);
 
-        $message = $title . "\n\n" . $description . "\n\nTo get this prompt click on the link:\n" . $url;
+        $hashtags = $this->keywordsToHashtags($prompt['seo_keywords'] ?? '');
+        $message = $title . "\n\n" . $description . "\n\nTo get this prompt click on the link:\n" . $url . "\n" . $hashtags;
 
         $apiUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/feed";
 
@@ -86,7 +87,8 @@ class SocialMediaSharing
         $title = $prompt['seo_title'] ?: $prompt['title'];
         $slug = $prompt['slug'] ?? strtolower(trim(preg_replace('/[^a-z0-9]+/', '-', $prompt['title']), '-'));
         $url = site_url('/prompts/' . $prompt['id'] . '/' . $slug);
-        $caption = $title . "\n\nTo get this prompt click on the link:\n" . $url;
+        $hashtags = $this->keywordsToHashtags($prompt['seo_keywords'] ?? '');
+        $caption = $title . "\n\nTo get this prompt click on the link:\n" . $url . "\n" . $hashtags;
 
         $result = $this->uploadPhoto($images[0], $caption);
         if ($result['success']) {
@@ -109,7 +111,8 @@ class SocialMediaSharing
         $title = $prompt['seo_title'] ?: $prompt['title'];
         $slug = $prompt['slug'] ?? strtolower(trim(preg_replace('/[^a-z0-9]+/', '-', $prompt['title']), '-'));
         $url = site_url('/prompts/' . $prompt['id'] . '/' . $slug);
-        $message = $title . "\n\nTo get this prompt click on the link:\n" . $url;
+        $hashtags = $this->keywordsToHashtags($prompt['seo_keywords'] ?? '');
+        $message = $title . "\n\nTo get this prompt click on the link:\n" . $url . "\n" . $hashtags;
 
         $apiUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/photos?access_token=" . urlencode($this->facebookAccessToken);
 
@@ -366,6 +369,20 @@ class SocialMediaSharing
 
         $errorMsg = $data['error']['message'] ?? ($data['message'] ?? 'Unknown API error');
         return ['success' => false, 'message' => 'API error: ' . $errorMsg];
+    }
+
+    private function keywordsToHashtags(string $keywords): string
+    {
+        if (empty(trim($keywords))) return '';
+        $parts = explode(',', $keywords);
+        $tags = [];
+        foreach ($parts as $kw) {
+            $clean = str_replace(' ', '', trim($kw));
+            if (!empty($clean)) {
+                $tags[] = '#' . $clean;
+            }
+        }
+        return empty($tags) ? '' : implode(' ', $tags);
     }
 
     public static function saveCredentials(array $credentials): void
