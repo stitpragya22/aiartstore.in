@@ -56,7 +56,7 @@
             <div class="col-12">
                 <div class="stat-card p-4 text-center">
                     <p class="text-secondary mb-0">
-                        Managed by <strong style="color: var(--accent-primary);">Stitpragya Technologies</strong>,
+                        Managed by <a href="https://stitpragya.in" target="_blank" rel="noopener" style="color: var(--accent-primary); text-decoration: none;"><strong>Stitpragya Technologies</strong></a>,
                         Savedi, Ahilyangar, MH, IND
                     </p>
                 </div>
