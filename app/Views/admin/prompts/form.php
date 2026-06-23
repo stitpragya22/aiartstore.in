@@ -40,8 +40,9 @@
         }
         </script>
         <div class="mb-3">
-            <label class="form-label fw-semibold">Notes</label>
-            <textarea name="notes" class="form-control" rows="3" placeholder="Model used, settings, or any other notes..."><?= old('notes', $prompt['notes'] ?? '') ?></textarea>
+            <label class="form-label fw-semibold">Notes <small class="text-muted">(HTML supported)</small></label>
+            <textarea name="notes" id="notesEditor" class="form-control" rows="6" placeholder="HTML content for user messages, links, tips..."><?= old('notes', $prompt['notes'] ?? '') ?></textarea>
+            <small class="text-muted">Rich text content shown to users. You can include links, images, and formatting.</small>
         </div>
 
         <hr style="border-color: var(--border-color);">
@@ -140,7 +141,24 @@
     </form>
 </div>
 
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
+tinymce.init({
+    selector: '#notesEditor',
+    height: 300,
+    menubar: false,
+    plugins: 'link lists code',
+    toolbar: 'bold italic underline | bullist numlist | link | code',
+    content_style: 'body { font-family:Inter,sans-serif; font-size:14px; color:#f1f1f6; background:#1a1a2e; }',
+    skin: 'oxide-dark',
+    valid_elements: '*[*]',
+    setup: function(editor) {
+        editor.on('change', function() {
+            editor.save();
+        });
+    }
+});
+
 function deletePromptImage(id) {
     if (!confirm('Remove this image?')) return;
     $.ajax({

@@ -149,11 +149,8 @@ $(document).ready(function() {
             '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
         }, function(res) {
             if (res.success) {
-                var msg = 'Facebook ' + label + ' posted successfully!';
-                if (res.data && res.data.post_url) {
-                    msg += ' <a href="' + res.data.post_url + '" target="_blank" style="color: var(--accent-primary); text-decoration: underline;">View post</a>';
-                }
-                showToast(msg, 'success');
+                var postUrl = res.data && res.data.post_url ? res.data.post_url : null;
+                showToast('Facebook ' + label + ' posted successfully!', 'success', postUrl);
             } else {
                 showToast(res.message || 'Failed to post', 'error');
             }
