@@ -99,6 +99,18 @@ class Settings extends BaseController
         return $this->response->setJSON($result);
     }
 
+    public function testFacebookToken()
+    {
+        if (!$this->request->is('post')) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
+        }
+
+        $sharer = new SocialMediaSharing();
+        $result = $sharer->verifyFacebookToken();
+
+        return $this->response->setJSON($result);
+    }
+
     private function saveUploadedImage(string $field, string $class): void
     {
         $file = $this->request->getFile($field);

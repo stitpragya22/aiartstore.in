@@ -142,7 +142,11 @@
 
         <div class="mb-3">
             <label class="form-label fw-semibold">Facebook Page Access Token</label>
-            <input type="password" name="facebook_access_token" id="facebook_access_token" class="form-control" value="<?= old('facebook_access_token', $settings['facebook_access_token'] ?? '') ?>" placeholder="Page Access Token with pages_manage_posts + pages_read_engagement">
+            <div class="input-group">
+                <input type="password" name="facebook_access_token" id="facebook_access_token" class="form-control" value="<?= old('facebook_access_token', $settings['facebook_access_token'] ?? '') ?>" placeholder="Page Access Token with pages_manage_posts + pages_read_engagement">
+                <button type="button" id="testTokenBtn" class="btn btn-outline-custom" style="font-size: 0.8rem;">Test</button>
+            </div>
+            <div id="tokenTestResult" class="small mt-1"></div>
         </div>
 
         <div class="mb-4 p-3" style="border: 1px dashed rgba(99,102,241,0.3); border-radius: 12px; background: rgba(99,102,241,0.03);">
@@ -185,6 +189,31 @@ $(document).ready(function() {
     }
     $('input[name="razorpay_mode"]').change(toggleKeyVisibility);
     toggleKeyVisibility();
+
+    $('#testTokenBtn').click(function() {
+        var token = $('#facebook_access_token').val().trim();
+        var pageId = $('#facebook_page_id').val().trim();
+        if (!token || !pageId) {
+            $('#tokenTestResult').html('<span class="text-danger">Save Page ID and Token first, then test.</span>');
+            return;
+        }
+        $('#tokenTestResult').html('<span class="text-muted">Testing...</span>');
+        $(this).prop('disabled', true);
+
+        $.post('<?= site_url('/admin/settings/test-facebook-token') ?>', {
+            '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+        }, function(res) {
+            if (res.success) {
+                $('#tokenTestResult').html('<span class="text-success">' + res.message + '</span>');
+            } else {
+                $('#tokenTestResult').html('<span class="text-danger">' + (res.message || 'Invalid token') + '</span>');
+            }
+        }).fail(function() {
+            $('#tokenTestResult').html('<span class="text-danger">Request failed.</span>');
+        }).always(function() {
+            $('#testTokenBtn').prop('disabled', false);
+        });
+    });
 
     $('#fetchPagesBtn').click(function() {
         var token = $('#fb_user_token').val().trim();

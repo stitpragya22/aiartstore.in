@@ -118,6 +118,7 @@ $routes->group('admin', ['filter' => 'group:superadmin,admin,developer'], functi
     $routes->get('settings', 'Admin\Settings::index');
     $routes->post('settings', 'Admin\Settings::index');
     $routes->post('settings/fetch-facebook-pages', 'Admin\Settings::fetchFacebookPages');
+    $routes->post('settings/test-facebook-token', 'Admin\Settings::testFacebookToken');
 
     $routes->get('users', 'Admin\Users::index');
     $routes->post('users/toggle-group/(:num)', 'Admin\Users::toggleGroup/$1');

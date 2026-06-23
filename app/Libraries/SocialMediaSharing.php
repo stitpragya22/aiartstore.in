@@ -78,24 +78,17 @@ class SocialMediaSharing
             return ['success' => false, 'message' => 'No images to share'];
         }
 
-        $firstImage = $images[0];
-        $imageUrl = base_url('uploads/prompts/' . $firstImage['image']);
-
         $title = $prompt['seo_title'] ?: $prompt['title'];
         $slug = $prompt['slug'] ?? url_title($prompt['title'], '-', true);
         $url = site_url('/prompts/' . $prompt['id'] . '/' . $slug);
-
         $caption = $title . "\n\n" . $url;
 
-        $apiUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/photos";
+        $result = $this->uploadPhoto($images[0], $caption);
+        if ($result['success']) {
+            return $result;
+        }
 
-        $postData = [
-            'url'          => $imageUrl,
-            'caption'      => $caption,
-            'access_token' => $this->facebookAccessToken,
-        ];
-
-        return $this->callGraphApi($apiUrl, $postData);
+        return $this->shareToFacebookLink($prompt);
     }
 
     public function shareToFacebookGallery(array $prompt, array $images): array
@@ -111,27 +104,17 @@ class SocialMediaSharing
         $title = $prompt['seo_title'] ?: $prompt['title'];
         $slug = $prompt['slug'] ?? url_title($prompt['title'], '-', true);
         $url = site_url('/prompts/' . $prompt['id'] . '/' . $slug);
-
         $message = $title . "\n\n" . $url;
 
         $uploaded = 0;
-        foreach ($images as $image) {
-            $imageUrl = base_url('uploads/prompts/' . $image['image']);
-
+        foreach ($images as $i => $image) {
             $caption = $message;
             if (count($images) > 1) {
-                $caption .= "\n\n[" . ($uploaded + 1) . '/' . count($images) . ']';
+                $caption .= "\n\n[" . ($i + 1) . '/' . count($images) . ']';
             }
 
-            $photoUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/photos";
-            $photoData = [
-                'url'          => $imageUrl,
-                'caption'      => $caption,
-                'access_token' => $this->facebookAccessToken,
-            ];
-
-            $photoResult = $this->callGraphApi($photoUrl, $photoData);
-            if ($photoResult['success']) {
+            $result = $this->uploadPhoto($image, $caption);
+            if ($result['success']) {
                 $uploaded++;
             }
         }
@@ -141,6 +124,87 @@ class SocialMediaSharing
         }
 
         return ['success' => true, 'message' => $uploaded . ' photo(s) posted to Facebook', 'data' => ['count' => $uploaded]];
+    }
+
+    private function uploadPhoto(array $image, string $caption): array
+    {
+        $filePath = FCPATH . 'uploads/prompts/' . $image['image'];
+
+        if (!is_file($filePath)) {
+            $imageUrl = base_url('uploads/prompts/' . $image['image']);
+            $apiUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/photos";
+            $postData = [
+                'url'          => $imageUrl,
+                'caption'      => $caption,
+                'access_token' => $this->facebookAccessToken,
+            ];
+            return $this->callGraphApi($apiUrl, $postData);
+        }
+
+        $apiUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/photos?access_token=" . urlencode($this->facebookAccessToken);
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL            => $apiUrl,
+            CURLOPT_POST           => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_TIMEOUT        => 60,
+            CURLOPT_POSTFIELDS     => [
+                'caption'  => $caption,
+                'source'   => new CURLFile($filePath),
+            ],
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            return ['success' => false, 'message' => 'cURL error: ' . $error];
+        }
+
+        $data = json_decode($response, true);
+
+        if ($httpCode >= 200 && $httpCode < 300 && !isset($data['error'])) {
+            return ['success' => true, 'message' => 'Photo posted successfully', 'data' => $data];
+        }
+
+        $errorMsg = $data['error']['message'] ?? ($data['message'] ?? 'Unknown API error');
+        return ['success' => false, 'message' => 'API error: ' . $errorMsg];
+    }
+
+    public function verifyFacebookToken(): array
+    {
+        if (!$this->isFacebookConfigured()) {
+            return ['success' => false, 'message' => 'Facebook not configured'];
+        }
+
+        $apiUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}?fields=id,name,access_token&access_token=" . urlencode($this->facebookAccessToken);
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL            => $apiUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_TIMEOUT        => 30,
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode >= 200 && $httpCode < 300) {
+            $data = json_decode($response, true);
+            if (!isset($data['error'])) {
+                return ['success' => true, 'message' => 'Token valid for page: ' . ($data['name'] ?? $this->facebookPageId)];
+            }
+        }
+
+        $data = json_decode($response, true);
+        $errorMsg = $data['error']['message'] ?? 'Unknown error';
+        return ['success' => false, 'message' => 'Token verification failed: ' . $errorMsg];
     }
 
     public function getPageAccessToken(string $userToken): array
