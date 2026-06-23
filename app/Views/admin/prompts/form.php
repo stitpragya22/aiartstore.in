@@ -141,22 +141,24 @@
     </form>
 </div>
 
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
 <script>
-tinymce.init({
-    selector: '#notesEditor',
-    height: 300,
-    menubar: false,
-    plugins: 'link lists code',
-    toolbar: 'bold italic underline | bullist numlist | link | code',
-    content_style: 'body { font-family:Inter,sans-serif; font-size:14px; color:#f1f1f6; background:#1a1a2e; }',
-    skin: 'oxide-dark',
-    valid_elements: '*[*]',
-    setup: function(editor) {
-        editor.on('change', function() {
-            editor.save();
-        });
-    }
+$(document).ready(function() {
+    $('#notesEditor').summernote({
+        height: 250,
+        toolbar: [
+            ['style', ['bold', 'italic', 'underline']],
+            ['para', ['ul', 'ol']],
+            ['insert', ['link']],
+            ['view', ['codeview']],
+        ],
+        callbacks: {
+            onChange: function() {
+                $('#notesEditor').val($('#notesEditor').summernote('code'));
+            }
+        }
+    });
 });
 
 function deletePromptImage(id) {
