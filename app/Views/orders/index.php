@@ -47,6 +47,9 @@
                 </table>
             </div>
         <?php endif; ?>
+        <div class="text-center mt-4">
+            <a href="<?= site_url('/custom-request') ?>" class="btn btn-outline-custom"><i class="bi bi-palette me-1"></i>Need custom AI art? Request it here</a>
+        </div>
     </div>
 </section>
 

@@ -45,7 +45,11 @@ $routes->post('/razorpay/webhook', 'Checkout::webhook');
 // Coupon validation (AJAX)
 $routes->post('/checkout/validate-coupon', 'Checkout::validateCoupon');
 
-// Orders / Downloads
+// Prompts (public - free prompts; subscription prompts require login)
+$routes->get('/prompts', 'Prompts::index');
+$routes->get('/prompts/(:num)/(:any)', 'Prompts::detail/$1/$2');
+
+// Orders / Downloads / Subscriptions
 $routes->group('', ['filter' => 'session'], static function ($routes) {
     $routes->get('/orders', 'Orders::index');
     $routes->get('/orders/(:any)', 'Orders::detail/$1');
@@ -55,18 +59,35 @@ $routes->group('', ['filter' => 'session'], static function ($routes) {
     $routes->get('/download/invoice/(:num)', 'Download::invoice/$1');
     $routes->get('/wishlist', 'Wishlist::index');
     $routes->post('/wishlist/toggle', 'Wishlist::toggle');
+    $routes->get('/subscriptions/my', 'Subscriptions::my');
+    $routes->get('/subscriptions/purchase/(:num)', 'Subscriptions::purchase/$1');
+    $routes->post('/subscriptions/purchase/(:num)', 'Subscriptions::purchase/$1');
+    $routes->post('/subscriptions/verify', 'Subscriptions::verify');
+    $routes->get('/custom-request/my', 'CustomRequest::my');
+    $routes->get('/custom-request/track/(:num)', 'CustomRequest::track/$1');
+    $routes->post('/custom-request/track/(:num)', 'CustomRequest::track/$1');
+    $routes->post('/custom-request/submit', 'CustomRequest::submit');
 });
+
+// Subscription Plans (public)
+$routes->get('/subscriptions/plans', 'Subscriptions::plans');
 
 // Sitemaps / Feeds
 $routes->get('/sitemap.xml', 'Sitemap::index');
 $routes->get('/feed/products.xml', 'Sitemap::feed');
 $routes->get('/feed/products.csv', 'Sitemap::feedCsv');
 
+// Custom AI Requests
+$routes->get('/custom-request', 'CustomRequest::index');
+$routes->post('/custom-request/submit', 'CustomRequest::submit');
+$routes->get('/custom-request/success', 'CustomRequest::success');
+
 // Legal Pages
 $routes->get('/terms', 'Pages::terms');
 $routes->get('/privacy', 'Pages::privacy');
 $routes->get('/refund', 'Pages::refund');
 $routes->get('/faq', 'Pages::faq');
+$routes->get('/about', 'Pages::about');
 $routes->get('/contact', 'Pages::contact');
 
 // Admin Routes
@@ -85,6 +106,7 @@ $routes->group('admin', ['filter' => 'group:superadmin,admin,developer'], functi
     $routes->post('categories/create', 'Admin\Categories::create');
     $routes->get('categories/edit/(:num)', 'Admin\Categories::edit/$1');
     $routes->post('categories/edit/(:num)', 'Admin\Categories::edit/$1');
+    $routes->post('categories/toggle/(:num)', 'Admin\Categories::toggle/$1');
     $routes->post('categories/delete/(:num)', 'Admin\Categories::delete/$1');
 
     $routes->get('orders', 'Admin\Orders::index');
@@ -114,6 +136,17 @@ $routes->group('admin', ['filter' => 'group:superadmin,admin,developer'], functi
     $routes->post('blog/posts/edit/(:num)', 'Admin\Blog::postEdit/$1');
     $routes->post('blog/posts/delete/(:num)', 'Admin\Blog::postDelete/$1');
 
+    // Prompts
+    $routes->get('prompts', 'Admin\Prompts::index');
+    $routes->get('prompts/create', 'Admin\Prompts::create');
+    $routes->post('prompts/create', 'Admin\Prompts::create');
+    $routes->get('prompts/edit/(:num)', 'Admin\Prompts::edit/$1');
+    $routes->post('prompts/edit/(:num)', 'Admin\Prompts::edit/$1');
+    $routes->post('prompts/delete/(:num)', 'Admin\Prompts::delete/$1');
+    $routes->post('prompts/delete-image/(:num)', 'Admin\Prompts::deleteImage/$1');
+    $routes->post('prompts/share-facebook/(:num)', 'Admin\Prompts::shareFacebook/$1');
+    $routes->post('prompts/share-instagram/(:num)', 'Admin\Prompts::shareInstagram/$1');
+
     // Coupons
     $routes->get('coupons', 'Admin\Coupons::index');
     $routes->get('coupons/create', 'Admin\Coupons::create');
@@ -129,6 +162,26 @@ $routes->group('admin', ['filter' => 'group:superadmin,admin,developer'], functi
     $routes->get('landing-pages/edit/(:num)', 'Admin\LandingPages::edit/$1');
     $routes->post('landing-pages/edit/(:num)', 'Admin\LandingPages::edit/$1');
     $routes->post('landing-pages/delete/(:num)', 'Admin\LandingPages::delete/$1');
+
+    // Subscription Plans
+    $routes->get('subscription-plans', 'Admin\SubscriptionPlans::index');
+    $routes->get('subscription-plans/create', 'Admin\SubscriptionPlans::create');
+    $routes->post('subscription-plans/create', 'Admin\SubscriptionPlans::create');
+    $routes->get('subscription-plans/edit/(:num)', 'Admin\SubscriptionPlans::edit/$1');
+    $routes->post('subscription-plans/edit/(:num)', 'Admin\SubscriptionPlans::edit/$1');
+    $routes->post('subscription-plans/delete/(:num)', 'Admin\SubscriptionPlans::delete/$1');
+
+    // Custom AI Requests
+    $routes->get('custom-requests', 'Admin\CustomRequests::index');
+    $routes->get('custom-requests/detail/(:num)', 'Admin\CustomRequests::detail/$1');
+    $routes->post('custom-requests/detail/(:num)', 'Admin\CustomRequests::detail/$1');
+    $routes->post('custom-requests/delete/(:num)', 'Admin\CustomRequests::delete/$1');
+
+    // User Subscriptions (admin)
+    $routes->get('user-subscriptions', 'Admin\UserSubscriptions::index');
+    $routes->get('user-subscriptions/create', 'Admin\UserSubscriptions::create');
+    $routes->post('user-subscriptions/create', 'Admin\UserSubscriptions::create');
+    $routes->post('user-subscriptions/cancel/(:num)', 'Admin\UserSubscriptions::cancel/$1');
 });
 
 // Landing Pages (public)

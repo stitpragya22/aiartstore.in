@@ -66,7 +66,10 @@ $categories = $categories ?? [];
                         <label class="form-label">Published At</label>
                         <input type="datetime-local" name="published_at" class="form-control" value="<?= isset($post['published_at']) ? date('Y-m-d\TH:i', strtotime($post['published_at'])) : '' ?>">
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Save Post</button>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-fill">Save Post</button>
+                        <button type="submit" name="save_and_stay" value="1" class="btn btn-outline-secondary flex-fill">Save & Stay</button>
+                    </div>
                 </div>
             </div>
 

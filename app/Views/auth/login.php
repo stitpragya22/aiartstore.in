@@ -20,7 +20,8 @@
             --accent-glow: rgba(139, 92, 246, 0.3);
             --text-primary: #f1f1f6;
             --text-secondary: #a0a0b8;
-            --text-muted: #6b6b80;
+            --text-muted: #cbd5e1;
+            --bs-secondary-color: #cbd5e1;
             --border-color: #2a2a40;
             --gradient-1: linear-gradient(135deg, #8b5cf6, #6366f1);
             --success: #10b981;

@@ -5,24 +5,59 @@
     <?= get_custom_setting('custom_css') ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= esc($title ?? 'AI Art Store') ?> | AI Art Store</title>
-    <meta name="description" content="<?= esc($meta_description ?? 'Discover premium AI-generated art. Browse our gallery of unique digital artworks available for instant download.') ?>">
-    <link rel="icon" type="image/png" href="<?= base_url('/favicon.png') ?>">
+    <title><?= esc($title ?? 'Premium AI Art Gallery') ?> | AI Art Store</title>
+    <meta name="description" content="<?= esc($meta_description ?? 'Discover 500+ premium AI-generated artworks for instant download. Browse our curated gallery of unique digital art — abstract, fantasy, cyberpunk, landscapes, and more. Perfect for creators and designers.') ?>"><?php if (!empty($meta_keywords)): ?>
+    <meta name="keywords" content="<?= esc($meta_keywords) ?>"><?php endif; ?>
+    <link rel="icon" type="image/png" href="<?= ($f = get_custom_setting('site_favicon')) ? base_url($f) : base_url('/favicon.png') ?>">
     <link rel="canonical" href="<?= site_url(uri_string()) ?>">
-    <meta property="og:title" content="<?= esc($meta_title ?? $title ?? 'AI Art Store') ?>">
-    <meta property="og:description" content="<?= esc($meta_description ?? 'Discover premium AI-generated art. Browse our gallery of unique digital artworks available for instant download.') ?>">
+    <meta property="og:title" content="<?= esc($meta_title ?? $title ?? 'Premium AI Art Gallery') ?>">
+    <meta property="og:description" content="<?= esc($meta_description ?? 'Discover 500+ premium AI-generated artworks for instant download. Browse our curated gallery of unique digital art — abstract, fantasy, cyberpunk, landscapes, and more.') ?>">
     <meta property="og:type" content="website">
     <meta property="og:url" content="<?= site_url(uri_string()) ?>">
-    <?php if (isset($meta_image) && $meta_image): ?>
-    <meta property="og:image" content="<?= base_url($meta_image) ?>">
-    <?php endif; ?>
+    <meta property="og:image" content="<?= base_url($meta_image ?? 'uploads/default-og.jpg') ?>">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="<?= esc($meta_title ?? $title ?? 'AI Art Store') ?>">
-    <meta name="twitter:description" content="<?= esc($meta_description ?? 'Discover premium AI-generated art.') ?>">
-    <?php if (isset($meta_image) && $meta_image): ?>
-    <meta name="twitter:image" content="<?= base_url($meta_image) ?>">
-    <?php endif; ?> 
+    <meta name="twitter:title" content="<?= esc($meta_title ?? $title ?? 'Premium AI Art Gallery') ?>">
+    <meta name="twitter:description" content="<?= esc($meta_description ?? 'Discover 500+ premium AI-generated artworks for instant download.') ?>">
+    <meta name="twitter:image" content="<?= base_url($meta_image ?? 'uploads/default-og.jpg') ?>">
     <meta name="csrf-token" content="<?= csrf_hash() ?>">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "AI Art Store",
+        "url": "<?= site_url('/') ?>",
+        "logo": "<?= base_url('/favicon.png') ?>",
+        "description": "Premium AI-generated digital art marketplace. Download high-quality AI artworks instantly.",
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "support@aiartstore.in",
+            "contactType": "customer support"
+        },
+        "sameAs": [
+            "https://www.instagram.com/aiartstore.in/",
+            "https://twitter.com/aiartstore",
+            "https://in.pinterest.com/aiartstore/"
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "AI Art Store",
+        "url": "<?= site_url('/') ?>",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "<?= site_url('/shop') ?>?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -41,7 +76,8 @@
             --accent-glow: rgba(139, 92, 246, 0.3);
             --text-primary: #f1f1f6;
             --text-secondary: #a0a0b8;
-            --text-muted: #6b6b80;
+            --text-muted: #cbd5e1;
+            --bs-secondary-color: #cbd5e1;
             --border-color: #2a2a40;
             --gradient-1: linear-gradient(135deg, #8b5cf6, #6366f1);
             --gradient-2: linear-gradient(135deg, #1a1a2e, #16213e);
@@ -318,7 +354,7 @@
             padding: 3rem 0;
             margin-top: auto;
         }
-        .footer .text-muted { color: #9ca3af !important; }
+        .footer .text-muted { color: #cbd5e1 !important; }
         .footer a.text-muted:hover { color: var(--accent-secondary) !important; }
         .footer h5, .footer h6 { color: var(--text-primary); }
 
@@ -582,6 +618,281 @@
         .btn-wishlist-detail.active:hover i {
             color: white;
         }
+
+        /* ===== Adobe Stock Inspired Styles ===== */
+        .stock-hero {
+            min-height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 6rem 0 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .stock-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, var(--accent-glow) 0%, transparent 70%),
+                        radial-gradient(ellipse at 80% 100%, rgba(99,102,241,0.15) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .stock-hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .stock-hero h1 span {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stock-hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 1rem auto 2rem;
+        }
+
+        .stock-search-wrapper {
+            max-width: 720px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            padding: 4px 4px 4px 24px;
+            transition: all 0.3s;
+        }
+        .stock-search-wrapper:focus-within {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+        .stock-search-wrapper i {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+        }
+        .stock-search-wrapper input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            padding: 14px 12px;
+            font-family: 'Inter', sans-serif;
+        }
+        .stock-search-wrapper input::placeholder {
+            color: var(--text-muted);
+        }
+        .stock-search-wrapper button {
+            background: var(--gradient-1);
+            border: none;
+            color: white;
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .stock-search-wrapper button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+
+        .stock-filter-pills {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+        .stock-filter-pills .pill {
+            padding: 8px 20px;
+            border-radius: 40px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s;
+            text-decoration: none;
+        }
+        .stock-filter-pills .pill:hover,
+        .stock-filter-pills .pill.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+
+        /* Section headers - Adobe Stock style */
+        .stock-section-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .stock-section-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.75rem;
+            margin: 0;
+        }
+        .stock-section-header p {
+            color: var(--text-secondary);
+            margin: 0.25rem 0 0;
+        }
+        .stock-section-header a {
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+        .stock-section-header a:hover {
+            text-decoration: underline;
+        }
+
+        /* Category Mini Cards */
+        .cat-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .cat-mini-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: block;
+        }
+        .cat-mini-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+        .cat-mini-card i {
+            font-size: 1.5rem;
+            color: var(--accent-primary);
+        }
+        .cat-mini-card h6 {
+            color: var(--text-primary);
+            margin: 0.5rem 0 0.25rem;
+            font-weight: 600;
+        }
+        .cat-mini-card small {
+            color: var(--text-muted);
+        }
+
+        /* Masonry Categories */
+        .cat-masonry {
+            column-count: 4;
+            column-gap: 16px;
+        }
+        .cat-masonry .cat-masonry-item {
+            display: block;
+            break-inside: avoid;
+            margin-bottom: 16px;
+            text-decoration: none;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .cat-masonry .cat-masonry-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+        }
+        .cat-masonry .cat-masonry-item > div {
+            transition: box-shadow 0.3s;
+        }
+        .cat-masonry .cat-masonry-item:hover {
+            box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+        }
+
+        /* FAQ Accordion */
+        .stock-faq .accordion-item {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .stock-faq .accordion-button {
+            background: transparent;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 1.25rem 0;
+            box-shadow: none;
+        }
+        .stock-faq .accordion-button::after {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238b5cf6' class='bi bi-plus-lg' viewBox='0 0 16 16'%3E%3Cpath d='M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2z'/%3E%3C/svg%3E");
+            transition: transform 0.3s;
+        }
+        .stock-faq .accordion-button:not(.collapsed)::after {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238b5cf6' class='bi bi-dash-lg' viewBox='0 0 16 16'%3E%3Cpath d='M2 8a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11A.5.5 0 0 1 2 8z'/%3E%3C/svg%3E");
+        }
+        .stock-faq .accordion-button:not(.collapsed) {
+            background: transparent;
+            color: var(--accent-primary);
+            box-shadow: none;
+        }
+        .stock-faq .accordion-body {
+            padding: 0 0 1.25rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Popular Categories Footer Grid */
+        .pop-cat-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .pop-cat-grid a {
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-decoration: none;
+            transition: all 0.25s;
+        }
+        .pop-cat-grid a:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .stock-hero h1 { font-size: 2.5rem; }
+            .cat-mini-grid { grid-template-columns: repeat(2, 1fr); }
+            .cat-masonry { column-count: 3; }
+        }
+        @media (max-width: 576px) {
+            .stock-hero h1 { font-size: 1.8rem; }
+            .stock-hero { min-height: 60vh; padding: 4rem 0 2rem; }
+            .stock-search-wrapper { border-radius: 40px; padding: 4px 4px 4px 16px; }
+            .stock-search-wrapper input { padding: 10px 8px; font-size: 0.9rem; }
+            .stock-search-wrapper button { padding: 8px 18px; font-size: 0.85rem; }
+            .cat-mini-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .cat-masonry { column-count: 2; column-gap: 10px; }
+            .cat-masonry .cat-masonry-item { margin-bottom: 10px; }
+            .stock-section-header h2 { font-size: 1.35rem; }
+        }
     </style>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -591,7 +902,11 @@
     <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container">
             <a class="navbar-brand" href="<?= site_url('/') ?>">
-                <i class="bi bi-stars"></i>AI Art Store
+                <?php if ($logo = get_custom_setting('site_logo')): ?>
+                    <img src="<?= base_url($logo) ?>" alt="AI Art Store" style="max-height:45px;border-radius:8px;">
+                <?php else: ?>
+                    <i class="bi bi-stars"></i>AI Art Store
+                <?php endif ?>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -600,7 +915,11 @@
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item"><a class="nav-link <?= current_url() == site_url('/') ? 'active' : '' ?>" href="<?= site_url('/') ?>">Home</a></li>
                     <li class="nav-item"><a class="nav-link <?= strpos(current_url(), '/shop') !== false ? 'active' : '' ?>" href="<?= site_url('/shop') ?>">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link <?= strpos(current_url(), '/custom-request') !== false ? 'active' : '' ?>" href="<?= site_url('/custom-request') ?>">Custom Art</a></li>
+                    <li class="nav-item"><a class="nav-link <?= strpos(current_url(), '/prompts') !== false ? 'active' : '' ?>" href="<?= site_url('/prompts') ?>">Prompts</a></li>
                     <li class="nav-item"><a class="nav-link <?= strpos(current_url(), '/blog') !== false ? 'active' : '' ?>" href="<?= site_url('/blog') ?>">Blog</a></li>
+                    <li class="nav-item"><a class="nav-link <?= current_url() == site_url('/about') ? 'active' : '' ?>" href="<?= site_url('/about') ?>">About</a></li>
+                    <li class="nav-item"><a class="nav-link <?= current_url() == site_url('/contact') ? 'active' : '' ?>" href="<?= site_url('/contact') ?>">Contact</a></li>
                     <li class="nav-item"><a class="nav-link <?= strpos(current_url(), '/orders') !== false ? 'active' : '' ?>" href="<?= site_url('/orders') ?>">Orders</a></li>
                     <li class="nav-item"><a class="nav-link <?= strpos(current_url(), '/downloads') !== false ? 'active' : '' ?>" href="<?= site_url('/downloads') ?>">Downloads</a></li>
                 </ul>
@@ -626,6 +945,8 @@
                                 <?php endif; ?>
                                 <li><a class="dropdown-item" href="<?= site_url('/orders') ?>"><i class="bi bi-box me-2"></i>My Orders</a></li>
                                 <li><a class="dropdown-item" href="<?= site_url('/downloads') ?>"><i class="bi bi-download me-2"></i>Downloads</a></li>
+                                <li><a class="dropdown-item" href="<?= site_url('/custom-request/my') ?>"><i class="bi bi-palette me-2"></i>Custom Requests</a></li>
+                                <li><a class="dropdown-item" href="<?= site_url('/subscriptions/my') ?>"><i class="bi bi-credit-card me-2"></i>My Subscription</a></li>
                                 <li><hr class="dropdown-divider" style="border-color: var(--border-color);"></li>
                                 <li><a class="dropdown-item" href="<?= site_url('/logout') ?>"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                             </ul>

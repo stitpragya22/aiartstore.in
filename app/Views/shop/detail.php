@@ -121,7 +121,7 @@
                         </div>
                     </div>
                 <?php else: ?>
-                <div class="d-flex gap-3 mt-4">
+                <div class="d-flex gap-3 mt-4" id="buy" style="scroll-margin-top: 90px;">
                     <button class="btn btn-primary-custom flex-grow-1 btn-lg" id="addToCartBtn" onclick="addToCart(<?= $product['id'] ?>)">
                         <i class="bi bi-cart-plus me-2"></i>Add to Cart
                     </button>
@@ -283,6 +283,17 @@ function addToCart(id) {
         btn.disabled = false;
     });
 }
+</script>
+
+<script>
+$(function() {
+    if (window.location.hash === '#buy') {
+        var target = $('#buy');
+        if (target.length) {
+            $('html, body').animate({ scrollTop: target.offset().top - 90 }, 400);
+        }
+    }
+});
 </script>
 
 <?= view('layouts/footer') ?>

@@ -195,6 +195,10 @@ class Blog extends BaseController
             if (!$this->postModel->update($id, $data)) {
                 return redirect()->back()->with('errors', $this->postModel->errors())->withInput();
             }
+
+            if ($this->request->getPost('save_and_stay')) {
+                return redirect()->to('/admin/blog/posts/edit/' . $id)->with('message', 'Post updated');
+            }
             return redirect()->to('/admin/blog/posts')->with('message', 'Post updated');
         }
 

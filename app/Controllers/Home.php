@@ -14,8 +14,10 @@ class Home extends BaseController
 
         $data['featured'] = $productModel->getFeatured();
         $data['categories'] = $categoryModel->getWithProductCount();
+        $data['curated_categories'] = $categoryModel->getCurated();
         $data['latest'] = $productModel->getActive()->findAll(8);
-        $data['title'] = 'Premium AI Art Gallery';
+        $data['title'] = 'Premium AI Art Gallery — 500+ Unique Digital Artworks';
+        $data['meta_description'] = 'Discover 500+ premium AI-generated artworks for instant download. Browse abstract, fantasy, cyberpunk, landscape, and portrait art. Curated AI art for creators and designers.';
 
         return view('home', $data);
     }

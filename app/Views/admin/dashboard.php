@@ -2,6 +2,7 @@
 
 <div class="row g-4 mb-4">
     <div class="col-md-3">
+        <a href="<?= site_url('/admin/products') ?>" class="text-decoration-none text-reset">
         <div class="stat-card-admin">
             <div class="d-flex align-items-center gap-3">
                 <div class="stat-icon" style="background: rgba(139,92,246,0.2); color: var(--accent-primary);"><i class="bi bi-image"></i></div>
@@ -11,8 +12,10 @@
                 </div>
             </div>
         </div>
+        </a>
     </div>
     <div class="col-md-3">
+        <a href="<?= site_url('/admin/orders') ?>" class="text-decoration-none text-reset">
         <div class="stat-card-admin">
             <div class="d-flex align-items-center gap-3">
                 <div class="stat-icon" style="background: rgba(16,185,129,0.2); color: var(--success);"><i class="bi bi-box"></i></div>
@@ -22,8 +25,10 @@
                 </div>
             </div>
         </div>
+        </a>
     </div>
     <div class="col-md-3">
+        <a href="<?= site_url('/admin/orders') ?>" class="text-decoration-none text-reset">
         <div class="stat-card-admin">
             <div class="d-flex align-items-center gap-3">
                 <div class="stat-icon" style="background: rgba(245,158,11,0.2); color: var(--warning);"><i class="bi bi-currency-rupee"></i></div>
@@ -33,8 +38,10 @@
                 </div>
             </div>
         </div>
+        </a>
     </div>
     <div class="col-md-3">
+        <a href="<?= site_url('/admin/users') ?>" class="text-decoration-none text-reset">
         <div class="stat-card-admin">
             <div class="d-flex align-items-center gap-3">
                 <div class="stat-icon" style="background: rgba(99,102,241,0.2); color: #818cf8;"><i class="bi bi-people"></i></div>
@@ -44,8 +51,10 @@
                 </div>
             </div>
         </div>
+        </a>
     </div>
     <div class="col-md-3">
+        <a href="<?= site_url('/admin/blog/posts') ?>" class="text-decoration-none text-reset">
         <div class="stat-card-admin">
             <div class="d-flex align-items-center gap-3">
                 <div class="stat-icon" style="background: rgba(236,72,153,0.2); color: #ec4899;"><i class="bi bi-pencil-square"></i></div>
@@ -55,6 +64,24 @@
                 </div>
             </div>
         </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="<?= site_url('/admin/custom-requests') ?>" class="text-decoration-none text-reset">
+        <div class="stat-card-admin">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon" style="background: rgba(244,63,94,0.2); color: #f43f5e;"><i class="bi bi-palette"></i></div>
+                <div>
+                    <small class="text-muted">Custom Requests</small>
+                    <h3 class="mb-0 fw-bold"><?= $totalCustomRequests ?>
+                        <?php if ($pendingCustomRequests > 0): ?>
+                            <small class="text-warning fs-6 ms-1">(<?= $pendingCustomRequests ?> pending)</small>
+                        <?php endif ?>
+                    </h3>
+                </div>
+            </div>
+        </div>
+        </a>
     </div>
 </div>
 
@@ -104,6 +131,41 @@
                     <td><span class="badge-status <?= $bp['status'] ?>"><?= ucfirst($bp['status']) ?></span></td>
                     <td class="text-muted"><?= $bp['published_at'] ? date('d M Y', strtotime($bp['published_at'])) : '-' ?></td>
                     <td><a href="<?= site_url('/admin/blog/posts/edit/' . $bp['id']) ?>" class="btn btn-sm btn-primary-custom">Edit</a></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
+</div>
+
+<div class="card-admin">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Recent Custom Requests</h5>
+        <a href="<?= site_url('/admin/custom-requests') ?>" class="btn btn-sm btn-outline-custom">View All</a>
+    </div>
+    <?php if (empty($recentCustomRequests)): ?>
+        <p class="text-muted mb-0">No custom requests yet</p>
+    <?php else: ?>
+    <div class="table-responsive">
+        <table class="table table-admin">
+            <thead><tr><th>#</th><th>Name</th><th>Plan</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+            <tbody>
+                <?php foreach ($recentCustomRequests as $cr): ?>
+                <tr>
+                    <td><strong>#<?= $cr['id'] ?></strong></td>
+                    <td><?= esc($cr['name']) ?></td>
+                    <td>
+                        <span class="badge bg-<?= $cr['plan'] === 'free' ? 'secondary' : ($cr['plan'] === '99' ? 'info' : ($cr['plan'] === '249' ? 'primary' : 'warning text-dark')) ?>">
+                            <?php if ($cr['plan'] === 'free'): ?>Free
+                            <?php elseif ($cr['plan'] === '99'): ?>₹99
+                            <?php elseif ($cr['plan'] === '249'): ?>₹249
+                            <?php elseif ($cr['plan'] === '499'): ?>₹499
+                            <?php endif ?>
+                        </span>
+                    </td>
+                    <td><span class="badge-status <?= $cr['status'] ?>"><?= ucfirst($cr['status']) ?></span></td>
+                    <td class="text-muted"><?= date('d M Y', strtotime($cr['created_at'])) ?></td>
+                    <td><a href="<?= site_url('/admin/custom-requests/detail/' . $cr['id']) ?>" class="btn btn-sm btn-primary-custom">View</a></td>
                 </tr>
                 <?php endforeach; ?>
             </tbody>

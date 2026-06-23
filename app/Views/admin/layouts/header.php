@@ -6,9 +6,12 @@
     <meta name="robots" content="noindex, nofollow">
     <meta name="csrf-token" content="<?= csrf_hash() ?>">
     <title><?= esc($title ?? 'Dashboard') ?> | AI Art Store Admin</title>
-    <link rel="icon" type="image/png" href="<?= base_url('/favicon.png') ?>">
+    <link rel="icon" type="image/png" href="<?= ($f = get_custom_setting('site_favicon')) ? base_url($f) : base_url('/favicon.png') ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -20,7 +23,8 @@
             --accent-secondary: #a78bfa;
             --text-primary: #f1f1f6;
             --text-secondary: #a0a0b8;
-            --text-muted: #6b6b80;
+            --text-muted: #cbd5e1;
+            --bs-secondary-color: #cbd5e1;
             --border-color: #2a2a40;
             --sidebar-width: 250px;
             --success: #10b981;
@@ -230,7 +234,13 @@
         <i class="bi bi-list fs-5"></i>
     </button>
     <aside class="sidebar">
-        <a href="<?= site_url('/admin') ?>" class="sidebar-brand"><i class="bi bi-stars me-2"></i>AI Art Store</a>
+        <a href="<?= site_url('/admin') ?>" class="sidebar-brand">
+            <?php if ($logo = get_custom_setting('site_logo')): ?>
+                <img src="<?= base_url($logo) ?>" alt="AI Art Store" style="max-height:32px;border-radius:6px;">
+            <?php else: ?>
+                <i class="bi bi-stars me-2"></i>AI Art Store
+            <?php endif ?>
+        </a>
         <nav>
             <div class="nav-item">
                 <a href="<?= site_url('/admin') ?>" class="nav-link <?= current_url() == site_url('/admin') ? 'active' : '' ?>">
@@ -278,8 +288,28 @@
                 </a>
             </div>
             <div class="nav-item">
+                <a href="<?= site_url('/admin/prompts') ?>" class="nav-link <?= strpos(current_url(), '/admin/prompts') !== false ? 'active' : '' ?>">
+                    <i class="bi bi-file-earmark-text"></i>Prompt Library
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="<?= site_url('/admin/subscription-plans') ?>" class="nav-link <?= strpos(current_url(), '/admin/subscription-plans') !== false ? 'active' : '' ?>">
+                    <i class="bi bi-credit-card"></i>Subscription Plans
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="<?= site_url('/admin/user-subscriptions') ?>" class="nav-link <?= strpos(current_url(), '/admin/user-subscriptions') !== false ? 'active' : '' ?>">
+                    <i class="bi bi-people"></i>Subscriptions
+                </a>
+            </div>
+            <div class="nav-item">
                 <a href="<?= site_url('/admin/coupons') ?>" class="nav-link <?= strpos(current_url(), '/admin/coupons') !== false ? 'active' : '' ?>">
                     <i class="bi bi-percent"></i>Coupons
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="<?= site_url('/admin/custom-requests') ?>" class="nav-link <?= strpos(current_url(), '/admin/custom-requests') !== false ? 'active' : '' ?>">
+                    <i class="bi bi-palette"></i>Custom Requests
                 </a>
             </div>
             <hr style="border-color: var(--border-color);">

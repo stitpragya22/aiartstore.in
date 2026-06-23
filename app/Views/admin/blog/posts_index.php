@@ -11,6 +11,7 @@
             <thead>
                 <tr>
                     <th>#</th>
+                    <th>Image</th>
                     <th>Title</th>
                     <th>Category</th>
                     <th>SEO Score</th>
@@ -23,6 +24,13 @@
                 <?php foreach ($posts as $p): ?>
                 <tr>
                     <td><?= $p['id'] ?></td>
+                    <td>
+                        <?php if ($p['featured_image']): ?>
+                            <img src="<?= base_url($p['featured_image']) ?>" alt="" style="width:60px;height:40px;object-fit:cover;border-radius:6px;">
+                        <?php else: ?>
+                            <span class="text-muted">—</span>
+                        <?php endif ?>
+                    </td>
                     <td>
                         <strong><?= esc($p['title']) ?></strong><br>
                         <small class="text-muted">/blog/<?= esc($p['slug']) ?></small>

@@ -1,4 +1,23 @@
 <?= view('layouts/header') ?>
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "<?= esc($post['title']) ?>",
+    "description": "<?= esc(mb_substr(strip_tags($post['excerpt'] ?: $post['content']), 0, 200)) ?>",
+    "author": {
+        "@type": "Organization",
+        "name": "AI Art Store"
+    },
+    "publisher": {
+        "@type": "Organization",
+        "name": "AI Art Store"
+    },
+    "datePublished": "<?= $post['published_at'] ? date('c', strtotime($post['published_at'])) : '' ?>",
+    "dateModified": "<?= $post['updated_at'] ? date('c', strtotime($post['updated_at'])) : date('c', strtotime($post['published_at'])) ?>",
+    "image": "<?= $post['featured_image'] ? base_url($post['featured_image']) : '' ?>"
+}
+</script>
 
 <article class="container py-5">
     <div class="row">
@@ -7,11 +26,21 @@
                 <a href="<?= site_url('blog?category=' . esc($post['category_slug'])) ?>" class="badge bg-primary text-decoration-none mb-2"><?= esc($post['category_name']) ?></a>
             <?php endif ?>
 
-            <h1 class="display-5 fw-bold mb-3"><?= esc($post['title']) ?></h1>
+            <h1 class="display-5 fw-bold mb-3"><?= esc($post['title']) ?>
+                <?php if (auth()->loggedIn() && auth()->user()->can('admin.access')): ?>
+                    <a href="<?= site_url('/admin/blog/posts/edit/' . $post['id']) ?>" class="btn btn-sm btn-outline-secondary ms-2" target="_blank" title="Edit this post">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                <?php endif ?>
+            </h1>
 
             <div class="text-muted mb-4">
+                <span><i class="bi bi-person me-1"></i>AI Art Store Team</span>
                 <?php if ($post['published_at']): ?>
-                    <span>Published: <?= date('F d, Y', strtotime($post['published_at'])) ?></span>
+                    <span class="ms-3"><i class="bi bi-calendar3 me-1"></i>Published: <?= date('F d, Y', strtotime($post['published_at'])) ?></span>
+                <?php endif ?>
+                <?php if ($post['updated_at'] && $post['updated_at'] != $post['published_at']): ?>
+                    <span class="ms-3"><i class="bi bi-arrow-clockwise me-1"></i>Updated: <?= date('F d, Y', strtotime($post['updated_at'])) ?></span>
                 <?php endif ?>
                 <?php if ($post['tags']): ?>
                     <span class="ms-3">
@@ -29,7 +58,7 @@
             <?php endif ?>
 
             <?php if ($post['excerpt']): ?>
-                <div class="lead text-muted mb-4 p-3 bg-light rounded">
+                <div class="lead mb-4 p-3 bg-light rounded" style="color:#1e293b;">
                     <?= esc($post['excerpt']) ?>
                 </div>
             <?php endif ?>

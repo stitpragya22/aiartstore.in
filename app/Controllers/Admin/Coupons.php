@@ -45,6 +45,7 @@ class Coupons extends BaseController
 
         if ($this->request->is('post')) {
             if (!$model->update($id, [
+                'id'         => $id,
                 'code'       => strtoupper($this->request->getPost('code')),
                 'type'       => $this->request->getPost('type'),
                 'value'      => $this->request->getPost('value'),

@@ -7,6 +7,7 @@ use App\Models\ProductModel;
 use App\Models\OrderModel;
 use App\Models\CategoryModel;
 use App\Models\BlogPostModel;
+use App\Models\CustomRequestModel;
 
 class Dashboard extends BaseController
 {
@@ -17,6 +18,7 @@ class Dashboard extends BaseController
         $categoryModel = new CategoryModel();
 
         $blogModel = new BlogPostModel();
+        $customRequestModel = new CustomRequestModel();
 
         $data['totalProducts'] = $productModel->where('status', 'active')->countAllResults();
         $data['totalOrders'] = $orderModel->countAll();
@@ -24,9 +26,12 @@ class Dashboard extends BaseController
         $data['totalCategories'] = $categoryModel->where('status', 'active')->countAllResults();
         $data['totalUsers'] = auth()->getProvider()->countAll();
         $data['totalBlogPosts'] = $blogModel->where('status', 'published')->countAllResults();
+        $data['totalCustomRequests'] = $customRequestModel->countAllResults();
+        $data['pendingCustomRequests'] = $customRequestModel->where('status', 'pending')->countAllResults();
         $data['recentBlogPosts'] = $blogModel->orderBy('id', 'DESC')->findAll(5);
 
         $data['recentOrders'] = $orderModel->orderBy('id', 'DESC')->findAll(5);
+        $data['recentCustomRequests'] = $customRequestModel->orderBy('id', 'DESC')->findAll(5);
         $data['title'] = 'Dashboard';
 
         return view('admin/dashboard', $data);

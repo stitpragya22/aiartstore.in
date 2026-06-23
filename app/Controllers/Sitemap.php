@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\ProductModel;
 use App\Models\CategoryModel;
 use App\Models\BlogPostModel;
+use App\Models\PromptModel;
 
 class Sitemap extends BaseController
 {
@@ -44,6 +45,8 @@ class Sitemap extends BaseController
             ['loc' => site_url('/'), 'priority' => '1.0', 'changefreq' => 'daily'],
             ['loc' => site_url('/shop'), 'priority' => '0.9', 'changefreq' => 'daily'],
             ['loc' => site_url('/blog'), 'priority' => '0.9', 'changefreq' => 'daily'],
+            ['loc' => site_url('/prompts'), 'priority' => '0.9', 'changefreq' => 'daily'],
+            ['loc' => site_url('/subscriptions/plans'), 'priority' => '0.7', 'changefreq' => 'weekly'],
             ['loc' => site_url('/faq'), 'priority' => '0.5', 'changefreq' => 'monthly'],
             ['loc' => site_url('/terms'), 'priority' => '0.3', 'changefreq' => 'monthly'],
             ['loc' => site_url('/privacy'), 'priority' => '0.3', 'changefreq' => 'monthly'],
@@ -82,6 +85,23 @@ class Sitemap extends BaseController
             $xml .= '    <priority>0.7</priority>' . "\n";
             $xml .= '    <changefreq>monthly</changefreq>' . "\n";
             $xml .= '    <lastmod>' . date('c', strtotime($bp['updated_at'] ?? $bp['published_at'])) . '</lastmod>' . "\n";
+            $xml .= '  </url>' . "\n";
+        }
+
+        $prompts = (new PromptModel())
+            ->select('id, slug, title, updated_at')
+            ->where('status', 'active')
+            ->orderBy('id', 'DESC')
+            ->findAll();
+
+        foreach ($prompts as $p) {
+            $slug = $p['slug'] ?: url_title($p['title'], '-', true);
+            $lastmod = $p['updated_at'] ? date('c', strtotime($p['updated_at'])) : date('c');
+            $xml .= '  <url>' . "\n";
+            $xml .= '    <loc>' . $this->ex(site_url('/prompts/' . $p['id'] . '/' . $slug)) . '</loc>' . "\n";
+            $xml .= '    <priority>0.6</priority>' . "\n";
+            $xml .= '    <changefreq>weekly</changefreq>' . "\n";
+            $xml .= '    <lastmod>' . $lastmod . '</lastmod>' . "\n";
             $xml .= '  </url>' . "\n";
         }
 

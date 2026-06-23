@@ -3,6 +3,7 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Libraries\SocialMediaSharing;
 
 class Settings extends BaseController
 {
@@ -21,10 +22,11 @@ class Settings extends BaseController
                 'razorpay_currency'         => $this->request->getPost('razorpay_currency'),
                 'custom_css'                => $this->request->getPost('custom_css'),
                 'custom_js'                 => $this->request->getPost('custom_js'),
+                'admin_email'               => $this->request->getPost('admin_email'),
             ];
 
             foreach ($settings as $key => $value) {
-                $class = (in_array($key, ['custom_css', 'custom_js'])) ? 'App\Views\Layouts' : 'App\Libraries\Razorpay';
+                $class = (in_array($key, ['custom_css', 'custom_js', 'admin_email', 'site_logo', 'site_favicon'])) ? 'App\Views\Layouts' : 'App\Libraries\Razorpay';
 
                 $existing = $db->table('settings')
                     ->where('class', $class)
@@ -48,6 +50,16 @@ class Settings extends BaseController
                 }
             }
 
+            $this->saveUploadedImage('site_logo', 'App\Views\Layouts');
+            $this->saveUploadedImage('site_favicon', 'App\Views\Layouts');
+
+            SocialMediaSharing::saveCredentials([
+                'facebook_page_id'       => $this->request->getPost('facebook_page_id'),
+                'facebook_access_token'  => $this->request->getPost('facebook_access_token'),
+                'instagram_business_id'  => $this->request->getPost('instagram_business_id'),
+                'instagram_access_token' => $this->request->getPost('instagram_access_token'),
+            ]);
+
             return redirect()->to('/admin/settings')->with('message', 'Settings saved successfully');
         }
 
@@ -61,7 +73,52 @@ class Settings extends BaseController
             $data['settings'][$row['key']] = $row['value'];
         }
 
+        $socialCreds = SocialMediaSharing::getCredentials();
+        foreach ($socialCreds as $key => $value) {
+            $data['settings'][$key] = $value;
+        }
+
         $data['title'] = 'Payment Settings';
         return view('admin/settings/index', $data);
+    }
+
+    private function saveUploadedImage(string $field, string $class): void
+    {
+        $file = $this->request->getFile($field);
+        if (!$file || !$file->isValid() || $file->hasMoved()) return;
+
+        if (!in_array($file->getMimeType(), ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/x-icon', 'image/vnd.microsoft.icon'])) return;
+
+        $uploadPath = FCPATH . 'uploads/site';
+        if (!is_dir($uploadPath)) mkdir($uploadPath, 0755, true);
+
+        $newName = $field . '_' . $file->getRandomName();
+        $file->move($uploadPath, $newName);
+        $path = 'uploads/site/' . $newName;
+
+        $db = db_connect();
+        $existing = $db->table('settings')
+            ->where('class', $class)
+            ->where('key', $field)
+            ->get()
+            ->getRow();
+
+        if ($existing) {
+            if ($existing->value && file_exists(FCPATH . $existing->value)) {
+                unlink(FCPATH . $existing->value);
+            }
+            $db->table('settings')
+                ->where('id', $existing->id)
+                ->update(['value' => $path, 'updated_at' => date('Y-m-d H:i:s')]);
+        } else {
+            $db->table('settings')->insert([
+                'class'      => $class,
+                'key'        => $field,
+                'value'      => $path,
+                'type'       => 'string',
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
     }
 }
