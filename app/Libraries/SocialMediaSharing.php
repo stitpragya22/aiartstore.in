@@ -114,45 +114,33 @@ class SocialMediaSharing
 
         $message = $title . "\n\n" . $url;
 
-        $mediaIds = [];
+        $uploaded = 0;
         foreach ($images as $image) {
             $imageUrl = base_url('uploads/prompts/' . $image['image']);
+
+            $caption = $message;
+            if (count($images) > 1) {
+                $caption .= "\n\n[" . ($uploaded + 1) . '/' . count($images) . ']';
+            }
 
             $photoUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/photos";
             $photoData = [
                 'url'          => $imageUrl,
-                'published'    => 'false',
+                'caption'      => $caption,
                 'access_token' => $this->facebookAccessToken,
             ];
 
             $photoResult = $this->callGraphApi($photoUrl, $photoData);
-            if (!$photoResult['success']) {
-                return $photoResult;
-            }
-
-            $mediaFbid = $photoResult['data']['id'] ?? null;
-            if ($mediaFbid) {
-                $mediaIds[] = $mediaFbid;
+            if ($photoResult['success']) {
+                $uploaded++;
             }
         }
 
-        if (empty($mediaIds)) {
-            return ['success' => false, 'message' => 'Failed to upload any images'];
+        if ($uploaded === 0) {
+            return $this->shareToFacebookLink($prompt);
         }
 
-        $attachedMedia = [];
-        foreach ($mediaIds as $fbid) {
-            $attachedMedia[] = ['media_fbid' => $fbid];
-        }
-
-        $publishUrl = "https://graph.facebook.com/v25.0/{$this->facebookPageId}/feed";
-        $publishData = [
-            'message'        => $message,
-            'attached_media' => json_encode($attachedMedia),
-            'access_token'   => $this->facebookAccessToken,
-        ];
-
-        return $this->callGraphApi($publishUrl, $publishData);
+        return ['success' => true, 'message' => $uploaded . ' photo(s) posted to Facebook', 'data' => ['count' => $uploaded]];
     }
 
     public function getPageAccessToken(string $userToken): array
