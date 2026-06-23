@@ -52,7 +52,7 @@ class SocialMediaSharing
 
         $title = $prompt['seo_title'] ?: $prompt['title'];
         $description = $prompt['seo_description'] ?: 'Check out this AI prompt at AI Art Store';
-        $slug = $prompt['slug'] ?? url_title($prompt['title'], '-', true);
+        $slug = $prompt['slug'] ?? strtolower(trim(preg_replace('/[^a-z0-9]+/', '-', $prompt['title']), '-'));
         $url = site_url('/prompts/' . $prompt['id'] . '/' . $slug);
 
         $message = $title . "\n\n" . $description . "\n\n" . $url;
@@ -79,7 +79,7 @@ class SocialMediaSharing
         }
 
         $title = $prompt['seo_title'] ?: $prompt['title'];
-        $slug = $prompt['slug'] ?? url_title($prompt['title'], '-', true);
+        $slug = $prompt['slug'] ?? strtolower(trim(preg_replace('/[^a-z0-9]+/', '-', $prompt['title']), '-'));
         $url = site_url('/prompts/' . $prompt['id'] . '/' . $slug);
         $caption = $title . "\n\n" . $url;
 
@@ -102,7 +102,7 @@ class SocialMediaSharing
         }
 
         $title = $prompt['seo_title'] ?: $prompt['title'];
-        $slug = $prompt['slug'] ?? url_title($prompt['title'], '-', true);
+        $slug = $prompt['slug'] ?? strtolower(trim(preg_replace('/[^a-z0-9]+/', '-', $prompt['title']), '-'));
         $url = site_url('/prompts/' . $prompt['id'] . '/' . $slug);
         $message = $title . "\n\n" . $url;
 
@@ -152,7 +152,7 @@ class SocialMediaSharing
             CURLOPT_TIMEOUT        => 60,
             CURLOPT_POSTFIELDS     => [
                 'caption'  => $caption,
-                'source'   => new CURLFile($filePath),
+                    'source'   => new \CURLFile($filePath),
             ],
         ]);
 
@@ -260,7 +260,7 @@ class SocialMediaSharing
         $imageUrl = base_url('uploads/prompts/' . $firstImage['image']);
 
         $title = $prompt['seo_title'] ?: $prompt['title'];
-        $slug = $prompt['slug'] ?? url_title($prompt['title'], '-', true);
+        $slug = $prompt['slug'] ?? strtolower(trim(preg_replace('/[^a-z0-9]+/', '-', $prompt['title']), '-'));
         $url = site_url('/prompts/' . $prompt['id'] . '/' . $slug);
 
         $caption = $title . "\n\nDownload and try this prompt at " . $url . "\n\n#aiart #aiprompts #digitalart #aiartstore";

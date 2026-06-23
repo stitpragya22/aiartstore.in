@@ -121,8 +121,12 @@ $(document).ready(function() {
             } else {
                 showToast(res.message || 'Failed to post', 'error');
             }
-        }).fail(function() {
-            showToast('Request failed. Check your credentials in settings.', 'error');
+        }).fail(function(jqXHR) {
+            var msg = 'Request failed (HTTP ' + jqXHR.status + ')';
+            if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                msg += ': ' + jqXHR.responseJSON.message;
+            }
+            showToast(msg, 'error');
         }).always(function() {
             button.prop('disabled', false).html('<i class="bi bi-' + (platform === 'fb' ? 'facebook' : 'instagram') + '"></i>');
         });
@@ -149,8 +153,12 @@ $(document).ready(function() {
             } else {
                 showToast(res.message || 'Failed to post', 'error');
             }
-        }).fail(function() {
-            showToast('Request failed. Check your credentials in settings.', 'error');
+        }).fail(function(jqXHR) {
+            var msg = 'Request failed (HTTP ' + jqXHR.status + ')';
+            if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                msg += ': ' + jqXHR.responseJSON.message;
+            }
+            showToast(msg, 'error');
         }).always(function() {
             var btn = button.closest('.dropdown').find('.share-fb');
             btn.prop('disabled', false).html('<i class="bi bi-facebook"></i>');
